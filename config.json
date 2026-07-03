@@ -1,56 +1,33 @@
 {
-  "version": "2.0.0",
+  "version": "2.1.0",
   "dns": {
     "primary": "1.1.1.1",
     "secondary": "8.8.8.8"
   },
   "startup": {
     "safe_to_disable": [
-      "DiscordPTB",
-      "electron.app.U.GG",
-      "EADM",
-      "electron.app.BlueStacks Services",
-      "Honeygain",
-      "AdobeGCInvoker-1.0",
-      "iTunesHelper",
-      "Spotify",
-      "EpicGamesLauncher",
-      "OneDrive",
-      "Skype",
-      "msnmsgr",
-      "GoogleDriveFS",
-      "TeamsMachineUninstallerLocalAppData",
-      "com.squirrel.Teams.Teams",
-      "RiotClient"
+      "DiscordPTB", "electron.app.U.GG", "EADM", "electron.app.BlueStacks Services",
+      "Honeygain", "AdobeGCInvoker-1.0", "iTunesHelper", "Spotify", "EpicGamesLauncher",
+      "OneDrive", "Skype", "msnmsgr", "GoogleDriveFS", "com.squirrel.Teams.Teams", "RiotClient"
     ]
   },
   "bloatware": {
     "packages": [
-      "Microsoft.BingNews",
-      "Microsoft.BingWeather",
-      "Microsoft.GetHelp",
-      "Microsoft.Getstarted",
-      "Microsoft.MicrosoftSolitaireCollection",
-      "Microsoft.MixedReality.Portal",
-      "Microsoft.People",
-      "Microsoft.SkypeApp",
-      "Microsoft.Todos",
-      "Microsoft.WindowsFeedbackHub",
-      "Microsoft.Xbox.TCUI",
-      "Microsoft.XboxApp",
-      "Microsoft.XboxGameOverlay",
-      "Microsoft.XboxGamingOverlay",
-      "Microsoft.XboxIdentityProvider",
-      "Microsoft.XboxSpeechToTextOverlay",
-      "Microsoft.YourPhone",
-      "Microsoft.ZuneMusic",
-      "Microsoft.ZuneVideo",
-      "MicrosoftTeams"
+      "Microsoft.BingNews", "Microsoft.BingWeather", "Microsoft.GetHelp", "Microsoft.Getstarted",
+      "Microsoft.MicrosoftSolitaireCollection", "Microsoft.MixedReality.Portal", "Microsoft.People",
+      "Microsoft.SkypeApp", "Microsoft.Todos", "Microsoft.WindowsFeedbackHub", "Microsoft.Xbox.TCUI",
+      "Microsoft.XboxApp", "Microsoft.XboxGameOverlay", "Microsoft.XboxGamingOverlay",
+      "Microsoft.XboxIdentityProvider", "Microsoft.XboxSpeechToTextOverlay", "Microsoft.YourPhone",
+      "Microsoft.ZuneMusic", "Microsoft.ZuneVideo", "MicrosoftTeams"
     ]
   },
-  "cleanup": {
-    "include_browser_cache": false,
-    "include_event_logs": false
+  "privacy": {
+    "disable_telemetry": true,
+    "disable_activity_history": true,
+    "disable_app_suggestions": true
+  },
+  "apps": {
+    "auto_update_winget": true
   },
   "report": {
     "generate_html": true,
