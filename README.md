@@ -1,11 +1,11 @@
 <div align="center">
 
-# ⚡ WinOptimizer v3.0.0
+# ⚡ WinOptimizer v3.1.0
 
-**The Ultimate Windows Encyclopedia & CLI Toolbox**
+**FastMenu Edition: The Ultimate Windows Encyclopedia**
 
 [![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-blue?style=for-the-badge&logo=powershell&logoColor=white)](https://microsoft.com/powershell)
-[![Version](https://img.shields.io/badge/Release-v3.0.0-orange?style=for-the-badge)](https://github.com/Barracuda1337/WinOptimizer/releases)
+[![Version](https://img.shields.io/badge/Release-v3.1.0-orange?style=for-the-badge)](https://github.com/Barracuda1337/WinOptimizer/releases)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
 
 ---
@@ -17,15 +17,15 @@
 </div>
 
 <a name="english"></a>
-## 🚀 Features (v3.0.0 - The Encyclopedia)
+## 🚀 Features (v3.1.0 - FastMenu)
 
 WinOptimizer has evolved into the **Ultimate Windows Management Suite**.
 
 ### 🛠️ Key Capabilities
+- **⚡ FastMenu Navigation:** Categorized menus now respond instantly to single-key input (No Enter required).
 - **📚 The Encyclopedia:** 10+ categories with 100+ curated elite tools (DDU, BCUninstaller, PowerToys, etc.).
-- **🔍 Winget Search Engine:** Can't find an app? Search and install over 10,000+ apps directly from the CLI.
+- **🔍 Winget Search Engine:** Search and install over 10,000+ apps directly from the CLI.
 - **⚡ Pro Optimization:** Telemetry removal, power management, and advanced system maintenance.
-- **📁 Clean & Independent:** No external brand names or site references. A pure, professional toolkit.
 - **🚀 One-Line Execution:** Instant setup on any fresh Windows installation.
 
 ---
@@ -35,10 +35,10 @@ WinOptimizer has evolved into the **Ultimate Windows Management Suite**.
 
 WinOptimizer artık sadece bir temizleyici değil, **Eksiksiz bir Yazılım Ansiklopedisi.**
 
-### ✨ Öne Çıkan Özellikler (v3.0.0)
+### ✨ Öne Çıkan Özellikler (v3.1.0)
+- **⚡ FastMenu Navigasyon:** Menüler arasında `Enter`a basmadan tuşa bastığınız anda anlık geçiş yapın.
 - **📚 Dev Yazılım Kütüphanesi:** 10 ana kategoride toplanmış 100'den fazla profesyonel araç.
 - **🔍 Gelişmiş Arama:** Listede olmayan her şeyi `winget` üzerinden saniyeler içinde bulun ve kurun.
-- **💎 Saf Deneyim:** Hiçbir marka veya siteye bağlı olmayan, tamamen özgün "WinOptimizer" kimliği.
 - **⚡ Rakipsiz Performans:** Tek tuşla telemetri temizliği ve sistem hızlandırma.
 
 ---
