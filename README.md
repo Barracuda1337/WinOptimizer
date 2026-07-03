@@ -1,13 +1,12 @@
 <div align="center">
 
-# ⚡ WinOptimizer v2.0
+# ⚡ WinOptimizer v2.3.0
 
-**Modern Windows Performance & Stability Engineering Tool**
+**Professional Windows CLI Toolbox & Software Store**
 
 [![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-blue?style=for-the-badge&logo=powershell&logoColor=white)](https://microsoft.com/powershell)
-[![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://windows.com)
+[![Version](https://img.shields.io/badge/Release-v2.3.0-orange?style=for-the-badge)](https://github.com/Barracuda1337/WinOptimizer/releases)
 [![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Release](https://img.shields.io/badge/Version-2.0.0-orange?style=for-the-badge)](https://github.com/Barracuda1337/WinOptimizer)
 
 ---
 
@@ -18,81 +17,45 @@
 </div>
 
 <a name="english"></a>
-## 🚀 Features
+## 🚀 Features (v2.3.0 Update)
 
-WinOptimizer is a professional-grade PowerShell script suite designed to eliminate common Windows performance bottlenecks. It focuses on reducing input latency, cleaning system clutter, and optimizing network stack.
+WinOptimizer has evolved from a simple cleanup script into a **Complete Windows Management Suite**.
 
-### 🛠️ Core Modules
-- **Low Latency Input:** Fixes mouse stuttering by repairing HID drivers and disabling USB Selective Suspend.
-- **Advanced Cleanup:** Deep cleans temp files, browser caches (Chrome, Firefox, Edge), and Windows Update logs.
-- **Gaming Optimization:** Enables Game Mode, Hardware Accelerated GPU Scheduling, and VRR.
-- **Network Performance:** Optimizes DNS (Cloudflare/Google), disables Network Throttling, and fixes 100Mbps Ethernet caps.
-- **System Stability:** Automatically creates restore points and provides detailed HTML performance reports.
+### 🛠️ New & Core Modules
+- **Categorized Software Store:** Install 30+ popular apps (Chrome, Discord, VLC, Cursor AI, etc.) via Winget using a simple CLI menu.
+- **Developer Essentials:** One-click setup for Cursor AI, VS Code, Git, Python, and more.
+- **Deep Optimization:** Telemetry removal, Power Throttling fixes, and advanced disk cleanup.
+- **One-Line Execution:** Run the full suite instantly on any PC without downloading files.
 
 ---
 
 <a name="türkçe"></a>
 ## 🇹🇷 Türkçe Tanıtım
 
-**WinOptimizer**, Windows'unuzun en yüksek verimlilikle çalışması için tasarlanmış kapsamlı bir optimizasyon aracıdır. Özellikle oyuncular, yazılımcılar ve bilgisayarından maksimum hız bekleyen kullanıcılar için geliştirilmiştir.
+WinOptimizer artık sadece bir temizleyici değil, **Eksiksiz bir Yazılım Merkezi.**
 
-### ✨ Öne Çıkanlar
-- **Fare Takılmasını Giderir:** Fare sürücülerini onarır ve USB güç tasarrufunu kapatarak akıcı hareket sağlar.
-- **Derinlemesine Temizlik:** Tarayıcı önbelleklerinden Windows Update kalıntılarına kadar Gigabaytlarca yer açar.
-- **Düşük Gecikme:** İnternet ve oyunlardaki tepki süresini (ping) iyileştirmek için ağ ayarlarını optimize eder.
-- **HTML Raporu:** İşlem bittiğinde ne kadar RAM/Disk kazandığınızı gösteren şık bir rapor sunar.
-
----
-
-## 📸 HTML Report Preview
-> *The script generates a beautiful dark-themed dashboard showing before/after results.*
+### ✨ Öne Çıkan Özellikler
+- **Kategorili Yazılım Mağazası:** Tarayıcılar, Geliştirici Araçları (Cursor AI dahil), Medya ve Mesajlaşma uygulamalarını Ninite tarzında kolayca yükleyin.
+- **Derin Performans:** Sistem bileşenlerini yormadan telemetri kapatma ve performans sınırlamalarını kaldırma.
+- **Hızlı Başlangıç:** Yeni formatlanmış bir bilgisayarın kurulumunu saniyeler içinde tamamlayın.
 
 ---
 
-## ⚡ Quick Start
+## ⚡ Quick Start (The One-Liner)
 
-1. Open **PowerShell as Administrator**.
-2. Run the following command:
+Run the entire suite directly from GitHub (Admin PowerShell):
 
 ```powershell
-# Clone or Download, then run:
-Set-ExecutionPolicy Bypass -Scope Process -Force
-.\WinOptimizer.ps1
+irm https://raw.githubusercontent.com/Barracuda1337/WinOptimizer/main/WinOptimizer.ps1 | iex
 ```
-
-Or run everything silently:
-```powershell
-.\WinOptimizer.ps1 -Silent
-```
-
----
-
-## ⚙️ Configuration
-You can customize the optimization behavior in `config.json`:
-- **startup:** List of applications to disable on startup.
-- **bloatware:** Built-in Windows apps to be safely removed.
-- **dns:** Custom DNS server settings.
-
----
-
-## 🛡️ Safety & Rollback
-WinOptimizer prioritizes safety:
-1. **Restore Point:** A system restore point is created before any change.
-2. **Log System:** Every action is logged to `%TEMP%\WinOptimizer_DATE.log`.
-3. **No Irreversible Changes:** Most optimizations can be reverted via standard Windows settings.
 
 ---
 
 ## 🤝 Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
+Contributions are welcome! If you want to add new software to the store, check `WinOptimizer.ps1`.
 
 <div align="center">
 
-Made with 🛠️ by [Barracuda1337 (Yunus Karataş)](https://github.com/Barracuda1337)
+Made with 🛠️ by [Barracuda1337](https://github.com/Barracuda1337)
 
 </div>
