@@ -1,93 +1,82 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    WinOptimizer v2.6 - Techolay Treasure Hub
+    WinOptimizer v2.7 - Expert Techolay Toolbox
 .DESCRIPTION
-    System optimization, categorized App Store, and deep maintenance tools.
+    Advanced maintenance tools, categorized App Store, and deep system cleaning.
 .AUTHOR
     Barracuda1337 (github.com/Barracuda1337)
 .VERSION
-    2.6.0
+    2.7.0
 #>
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'SilentlyContinue'
 
 # ============================================================
-#  ULTIMATE SOFTWARE REPOSITORY (V2.6)
+#  THE EXPERT SOFTWARE REPOSITORY (V2.7)
 # ============================================================
-$script:Version = "2.6.0"
+$script:Version = "2.7.0"
 $script:SoftwareRepo = @{
     "1" = @{ 
-        Name = "Tarayicilar (Modern & Klasik)"; 
+        Name = "Tarayicilar (Browsers)"; 
         Apps = @(
             @{ name = "Google Chrome"; id = "Google.Chrome" },
-            @{ name = "Zen Browser (Yeni!)"; id = "Zen-Browser.Zen" },
-            @{ name = "Arc Browser (Yeni!)"; id = "TheBrowserCompany.Arc" },
             @{ name = "Brave Browser"; id = "Brave.Brave" },
-            @{ name = "Mozilla Firefox"; id = "Mozilla.Firefox" }
+            @{ name = "Zen Browser"; id = "Zen-Browser.Zen" },
+            @{ name = "Arc Browser"; id = "TheBrowserCompany.Arc" }
         )
     };
     "2" = @{ 
-        Name = "Bakim, Onarim & Test (Techolay)"; 
+        Name = "Sistem Bakim & Onarim (Expert)"; 
         Apps = @(
-            @{ name = "DDU (Ekran Karti Temizleyici)"; id = "Wagnardsoft.DisplayDriverUninstaller" },
-            @{ name = "MS PC Manager (Resmi)"; id = "Microsoft.PCManager" },
-            @{ name = "Rufus (Format USB Hazirla)"; id = "PeteBatard.Rufus" },
-            @{ name = "FurMark (GPU Stress Test)"; id = "Geeks3D.FurMark" },
-            @{ name = "CrystalDiskInfo (Disk Saglik)"; id = "CrystalDewWorld.CrystalDiskInfo" },
-            @{ name = "CrystalDiskMark (Disk Hiz)"; id = "CrystalDewWorld.CrystalDiskMark" }
+            @{ name = "DDU (Driver Uninstaller)"; id = "Wagnardsoft.DisplayDriverUninstaller" },
+            @{ name = "Revo Uninstaller (Derin Sil)"; id = "RevoUninstaller.RevoUninstaller" },
+            @{ name = "Microsoft PC Manager"; id = "Microsoft.PCManager" },
+            @{ name = "Rufus (ISO-to-USB)"; id = "PeteBatard.Rufus" },
+            @{ name = "BleachBit (Derin Temizlik)"; id = "BleachBit.BleachBit" },
+            @{ name = "Autoruns (Sysinternals)"; id = "Microsoft.Sysinternals.Autoruns" }
         )
     };
     "3" = @{ 
-        Name = "Donanim Izleme & Ses"; 
+        Name = "Donanim Test & Analiz"; 
         Apps = @(
-            @{ name = "MSI Afterburner"; id = "MSI.Afterburner" },
-            @{ name = "HWiNFO64"; id = "REALiX.HWiNFO64" },
             @{ name = "CPU-Z"; id = "CPUID.CPU-Z" },
-            @{ name = "EarTrumpet (Ses)"; id = "File-New-Project.EarTrumpet" },
-            @{ name = "FxSound (Ses)"; id = "FxSound.FxSound" }
+            @{ name = "GPU-Z"; id = "TechPowerUp.GPU-Z" },
+            @{ name = "HWiNFO64"; id = "REALiX.HWiNFO64" },
+            @{ name = "CrystalDiskInfo"; id = "CrystalDewWorld.CrystalDiskInfo" },
+            @{ name = "FurMark (GPU Stress)"; id = "Geeks3D.FurMark" },
+            @{ name = "Speccy (Hardware Info)"; id = "Piriform.Speccy" }
         )
     };
     "4" = @{ 
-        Name = "Pro Araclar & Gelistirici"; 
+        Name = "Uretkenlik & Medya"; 
         Apps = @(
-            @{ name = "Cursor AI"; id = "Anysphere.Cursor" },
-            @{ name = "VS Code"; id = "Microsoft.VisualStudioCode" },
-            @{ name = "PowerToys"; id = "Microsoft.PowerToys" },
             @{ name = "Everything (Hizli Arama)"; id = "voidtools.Everything" },
-            @{ name = "Notepad++"; id = "Notepad++.Notepad++" }
+            @{ name = "PowerToys"; id = "Microsoft.PowerToys" },
+            @{ name = "Notepad++"; id = "Notepad++.Notepad++" },
+            @{ name = "VLC Media Player"; id = "VideoLAN.VLC" },
+            @{ name = "Spotify"; id = "Spotify.Spotify" }
         )
     };
     "5" = @{ 
-        Name = "Medya & Internet"; 
+        Name = "Iletisimi & Gaming"; 
         Apps = @(
-            @{ name = "Spotify"; id = "Spotify.Spotify" },
-            @{ name = "VLC Player"; id = "VideoLAN.VLC" },
             @{ name = "Discord"; id = "Discord.Discord" },
-            @{ name = "qBittorrent"; id = "qBittorrent.qBittorrent" },
-            @{ name = "IDM (Indirme)"; id = "Tonec.InternetDownloadManager" }
-        )
-    };
-    "6" = @{ 
-        Name = "Gaming & Ping Boosters"; 
-        Apps = @(
-            @{ name = "ExitLag"; id = "ExitLag.ExitLag" },
-            @{ name = "LagoFast"; id = "LagoFast.LagoFast" },
-            @{ name = "Steam"; id = "Valve.Steam" }
+            @{ name = "Steam"; id = "Valve.Steam" },
+            @{ name = "ExitLag (Ping)"; id = "ExitLag.ExitLag" },
+            @{ name = "LagoFast (Ping)"; id = "LagoFast.LagoFast" }
         )
     }
 }
 
 # ============================================================
-#  ENGINE & UI
+#  CORE FUNCTIONS
 # ============================================================
 function Write-Banner {
     Clear-Host
-    $os = Get-CimInstance Win32_OperatingSystem
     Write-Host "  ================================================================" -ForegroundColor Cyan
-    Write-Host "   WinOptimizer v$($script:Version)  --  Techolay Treasure Hunt" -ForegroundColor White
-    Write-Host "   User: Barracuda1337 | OS: $($os.Caption)" -ForegroundColor DarkGray
+    Write-Host "   WinOptimizer v$($script:Version)  --  EXPERT EDITION" -ForegroundColor White
     Write-Host "  ================================================================" -ForegroundColor Cyan
     Write-Host ""
 }
@@ -95,7 +84,7 @@ function Write-Banner {
 function Show-AppStore {
     while ($true) {
         Write-Banner
-        Write-Host "  --- KATEGORI SECIN ---" -ForegroundColor Yellow
+        Write-Host "  --- UZMAN YAZILIM KATEGORILERI ---" -ForegroundColor Yellow
         $keys = $script:SoftwareRepo.Keys | Sort-Object
         foreach ($k in $keys) { Write-Host "  [$k] $($script:SoftwareRepo[$k].Name)" -ForegroundColor White }
         Write-Host "  [Q] Geri Don" -ForegroundColor DarkGray
@@ -108,12 +97,11 @@ function Show-AppStore {
             $category = $script:SoftwareRepo[$catInput]
             Write-Banner
             Write-Host "  --- $($category.Name) ---" -ForegroundColor Yellow
-            Write-Host "  Liste: " -ForegroundColor Gray
             for ($i=0; $i -lt $category.Apps.Count; $i++) {
                 Write-Host "  [$($i+1)] $($category.Apps[$i].name)" -ForegroundColor White
             }
             Write-Host ""
-            Write-Host "  Numaralari yazin (or: 1,3) veya 'A' (Hepsi). Geri icin 'B':" -ForegroundColor DarkGray
+            Write-Host "  (or: 1,3) 'A' (Hepsi) | [B] Geri" -ForegroundColor DarkGray
             Write-Host "  Secim: " -NoNewline
             $appInput = Read-Host
             if ($appInput.ToUpper() -eq "B") { continue }
@@ -129,7 +117,7 @@ function Show-AppStore {
                     winget install --id $app.id --silent --accept-package-agreements --accept-source-agreements
                 }
             }
-            Write-Host "  Bitti. Devam etmek icin Enter..." -ForegroundColor Green; Read-Host | Out-Null
+            Write-Host "  Islem tamam. Enter..." -ForegroundColor Green; Read-Host | Out-Null
         }
     }
 }
@@ -143,10 +131,9 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 
 while ($true) {
     Write-Banner
-    Write-Host "  [1] HIZLI OPTIMIZE ET (Temizlik & Servisler)" -ForegroundColor Cyan
-    Write-Host "  [2] TE-HO-LAY YAZILIM MAGAZASI" -ForegroundColor Green
-    Write-Host "  [3] PING DUSURME REHBERI" -ForegroundColor Yellow
-    Write-Host "  [4] TUM UYGULAMALARI GUNCELLE (Sistem Sagligi)" -ForegroundColor White
+    Write-Host "  [1] TUM OPTIMIZASYONLARI UYGULA" -ForegroundColor Cyan
+    Write-Host "  [2] UZMAN YAZILIM MAGAZASI (Techolay Meta)" -ForegroundColor Green
+    Write-Host "  [3] TUM UYGULAMALARI GUNCELLE (Sistem Sagligi)" -ForegroundColor White
     Write-Host "  [Q] CIKIS" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "  Seciminiz: " -NoNewline
@@ -155,21 +142,15 @@ while ($true) {
     switch ($choice) {
         "1" { 
             Write-Host "  [!] Calisiyor..." -ForegroundColor Cyan
+            # Telemetry & Power
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -Type DWord -ErrorAction SilentlyContinue
             powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
+            # Clean
             Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue 
             Write-Host "  [OK] Bitti!" -ForegroundColor Green; Start-Sleep 2
         }
         "2" { Show-AppStore }
-        "3" { 
-            Clear-Host
-            Write-Host "  PING DUSURME REHBERI" -ForegroundColor Yellow
-            Write-Host "  1. ExitLag gibi araclar veriyi ISS yonlendirmesinden kurtarir."
-            Write-Host "  2. Rakipler: LagoFast, GearUp Booster, NoPing."
-            Write-Host "  3. Tavsiye: ISS'niz kotu degilse bu araclar ping artirabilir!"
-            Read-Host "  Enter..." | Out-Null
-        }
-        "4" { winget upgrade --all; Write-Host "Bitti. Enter..."; Read-Host | Out-Null }
+        "3" { winget upgrade --all; Write-Host "Bitti. Enter..."; Read-Host | Out-Null }
         "Q" { break }
     }
 }
