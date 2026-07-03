@@ -118,7 +118,7 @@ function Write-Banner {
     Write-Host "  ================================================================" -ForegroundColor Cyan
     Write-Host "   WinOptimizer v$($script:Version)  --  Windows Optimizer" -ForegroundColor White
     Write-Host "   Compatible: Windows 10 / 11 (x64) | PS 5.1+" -ForegroundColor DarkGray
-    Write-Host "   Yunus Karatas (github.com/Barracuda1337)" -ForegroundColor DarkGray
+    Write-Host "   Barracuda1337 (github.com/Barracuda1337)" -ForegroundColor DarkGray
     Write-Host "  ================================================================" -ForegroundColor Cyan
     Write-Host ""
 
@@ -879,7 +879,7 @@ function Show-Summary {
 
     Write-Host ""
     Write-Host "  =============================================================" -ForegroundColor Cyan
-    Write-Host "   WinOptimizer v$($script:Version)  --  By Yunus Karatas" -ForegroundColor White
+    Write-Host "   WinOptimizer v$($script:Version)  --  By Barracuda1337" -ForegroundColor White
     Write-Host "   github.com/Barracuda1337/WinOptimizer" -ForegroundColor DarkGray
     Write-Host "  =============================================================" -ForegroundColor Cyan
 
