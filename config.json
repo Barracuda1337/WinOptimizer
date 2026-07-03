@@ -1,36 +1,21 @@
 {
-  "version": "2.1.0",
-  "dns": {
-    "primary": "1.1.1.1",
-    "secondary": "8.8.8.8"
-  },
+  "version": "2.2.0",
+  "dns": { "primary": "1.1.1.1", "secondary": "8.8.8.8" },
   "startup": {
     "safe_to_disable": [
       "DiscordPTB", "electron.app.U.GG", "EADM", "electron.app.BlueStacks Services",
-      "Honeygain", "AdobeGCInvoker-1.0", "iTunesHelper", "Spotify", "EpicGamesLauncher",
-      "OneDrive", "Skype", "msnmsgr", "GoogleDriveFS", "com.squirrel.Teams.Teams", "RiotClient"
+      "Honeygain", "AdobeGCInvoker-1.0", "Spotify", "EpicGamesLauncher", "OneDrive", "RiotClient"
     ]
   },
-  "bloatware": {
-    "packages": [
-      "Microsoft.BingNews", "Microsoft.BingWeather", "Microsoft.GetHelp", "Microsoft.Getstarted",
-      "Microsoft.MicrosoftSolitaireCollection", "Microsoft.MixedReality.Portal", "Microsoft.People",
-      "Microsoft.SkypeApp", "Microsoft.Todos", "Microsoft.WindowsFeedbackHub", "Microsoft.Xbox.TCUI",
-      "Microsoft.XboxApp", "Microsoft.XboxGameOverlay", "Microsoft.XboxGamingOverlay",
-      "Microsoft.XboxIdentityProvider", "Microsoft.XboxSpeechToTextOverlay", "Microsoft.YourPhone",
-      "Microsoft.ZuneMusic", "Microsoft.ZuneVideo", "MicrosoftTeams"
-    ]
-  },
-  "privacy": {
-    "disable_telemetry": true,
-    "disable_activity_history": true,
-    "disable_app_suggestions": true
-  },
-  "apps": {
-    "auto_update_winget": true
-  },
-  "report": {
-    "generate_html": true,
-    "open_after_generate": true
-  }
+  "install_list": [
+    { "name": "Google Chrome", "id": "Google.Chrome" },
+    { "name": "Visual Studio Code", "id": "Microsoft.VisualStudioCode" },
+    { "name": "Spotify", "id": "Spotify.Spotify" },
+    { "name": "Steam", "id": "Valve.Steam" },
+    { "name": "Discord", "id": "Discord.Discord" },
+    { "name": "VLC Media Player", "id": "VideoLAN.VLC" },
+    { "name": "7-Zip", "id": "7zip.7zip" },
+    { "name": "AB Download Manager", "id": "alirezahe.ABDownloadManager" }
+  ],
+  "report": { "generate_html": true, "open_after_generate": true }
 }
