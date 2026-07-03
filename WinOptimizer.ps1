@@ -1,72 +1,72 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    WinOptimizer v2.5 - Community & Techolay Edition
+    WinOptimizer v2.6 - Techolay Treasure Hub
 .DESCRIPTION
-    Comprehensive Windows survival kit with community-driven app store.
+    System optimization, categorized App Store, and deep maintenance tools.
 .AUTHOR
     Barracuda1337 (github.com/Barracuda1337)
 .VERSION
-    2.5.0
+    2.6.0
 #>
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'SilentlyContinue'
 
 # ============================================================
-#  ULTIMATE SOFTWARE REPOSITORY
+#  ULTIMATE SOFTWARE REPOSITORY (V2.6)
 # ============================================================
-$script:Version = "2.5.0"
+$script:Version = "2.6.0"
 $script:SoftwareRepo = @{
     "1" = @{ 
-        Name = "Web Tarayicilar & Iletisim"; 
+        Name = "Tarayicilar (Modern & Klasik)"; 
         Apps = @(
             @{ name = "Google Chrome"; id = "Google.Chrome" },
+            @{ name = "Zen Browser (Yeni!)"; id = "Zen-Browser.Zen" },
+            @{ name = "Arc Browser (Yeni!)"; id = "TheBrowserCompany.Arc" },
             @{ name = "Brave Browser"; id = "Brave.Brave" },
-            @{ name = "Discord"; id = "Discord.Discord" },
-            @{ name = "Telegram"; id = "Telegram.TelegramDesktop" }
+            @{ name = "Mozilla Firefox"; id = "Mozilla.Firefox" }
         )
     };
     "2" = @{ 
-        Name = "Sistem Izleme & Donanim (Techolay)"; 
+        Name = "Bakim, Onarim & Test (Techolay)"; 
+        Apps = @(
+            @{ name = "DDU (Ekran Karti Temizleyici)"; id = "Wagnardsoft.DisplayDriverUninstaller" },
+            @{ name = "MS PC Manager (Resmi)"; id = "Microsoft.PCManager" },
+            @{ name = "Rufus (Format USB Hazirla)"; id = "PeteBatard.Rufus" },
+            @{ name = "FurMark (GPU Stress Test)"; id = "Geeks3D.FurMark" },
+            @{ name = "CrystalDiskInfo (Disk Saglik)"; id = "CrystalDewWorld.CrystalDiskInfo" },
+            @{ name = "CrystalDiskMark (Disk Hiz)"; id = "CrystalDewWorld.CrystalDiskMark" }
+        )
+    };
+    "3" = @{ 
+        Name = "Donanim Izleme & Ses"; 
         Apps = @(
             @{ name = "MSI Afterburner"; id = "MSI.Afterburner" },
             @{ name = "HWiNFO64"; id = "REALiX.HWiNFO64" },
             @{ name = "CPU-Z"; id = "CPUID.CPU-Z" },
-            @{ name = "GPU-Z"; id = "TechPowerUp.GPU-Z" },
-            @{ name = "AIDA64 Extreme"; id = "FinalWire.AIDA64.Extreme" }
-        )
-    };
-    "3" = @{ 
-        Name = "Medya, Ses & Goruntu"; 
-        Apps = @(
-            @{ name = "FxSound (Ses Artirici)"; id = "FxSound.FxSound" },
-            @{ name = "EarTrumpet (Ses Kontrol)"; id = "File-New-Project.EarTrumpet" },
-            @{ name = "VLC Media Player"; id = "VideoLAN.VLC" },
-            @{ name = "OBS Studio"; id = "OBSProject.OBSStudio" },
-            @{ name = "HandBrake"; id = "HandBrake.HandBrake" },
-            @{ name = "Spotify"; id = "Spotify.Spotify" }
+            @{ name = "EarTrumpet (Ses)"; id = "File-New-Project.EarTrumpet" },
+            @{ name = "FxSound (Ses)"; id = "FxSound.FxSound" }
         )
     };
     "4" = @{ 
-        Name = "Gelistirici & Pro Araclar"; 
+        Name = "Pro Araclar & Gelistirici"; 
         Apps = @(
             @{ name = "Cursor AI"; id = "Anysphere.Cursor" },
             @{ name = "VS Code"; id = "Microsoft.VisualStudioCode" },
-            @{ name = "Notepad++"; id = "Notepad++.Notepad++" },
-            @{ name = "Git"; id = "Git.Git" },
-            @{ name = "PowerToys"; id = "Microsoft.PowerToys" }
+            @{ name = "PowerToys"; id = "Microsoft.PowerToys" },
+            @{ name = "Everything (Hizli Arama)"; id = "voidtools.Everything" },
+            @{ name = "Notepad++"; id = "Notepad++.Notepad++" }
         )
     };
     "5" = @{ 
-        Name = "Dosya, Disk & Internet"; 
+        Name = "Medya & Internet"; 
         Apps = @(
-            @{ name = "Everything (Arama)"; id = "voidtools.Everything" },
-            @{ name = "WizTree (Disk Analiz)"; id = "AntibodySoftware.WizTree" },
-            @{ name = "7-Zip"; id = "7zip.7zip" },
-            @{ name = "IDM"; id = "Tonec.InternetDownloadManager" },
+            @{ name = "Spotify"; id = "Spotify.Spotify" },
+            @{ name = "VLC Player"; id = "VideoLAN.VLC" },
+            @{ name = "Discord"; id = "Discord.Discord" },
             @{ name = "qBittorrent"; id = "qBittorrent.qBittorrent" },
-            @{ name = "ShareX"; id = "ShareX.ShareX" }
+            @{ name = "IDM (Indirme)"; id = "Tonec.InternetDownloadManager" }
         )
     };
     "6" = @{ 
@@ -74,39 +74,20 @@ $script:SoftwareRepo = @{
         Apps = @(
             @{ name = "ExitLag"; id = "ExitLag.ExitLag" },
             @{ name = "LagoFast"; id = "LagoFast.LagoFast" },
-            @{ name = "GearUP Booster"; id = "GearUP.GearUPBooster" },
             @{ name = "Steam"; id = "Valve.Steam" }
         )
     }
 }
 
 # ============================================================
-#  REBHER & ENGINE
+#  ENGINE & UI
 # ============================================================
-function Show-PingGuide {
-    Clear-Host
-    Write-Host "  ================================================================" -ForegroundColor Cyan
-    Write-Host "                 PING & SISTEM TAVSIYELERI" -ForegroundColor White
-    Write-Host "  ================================================================" -ForegroundColor Cyan
-    Write-Host ""
-    Write-Host "  1. Ping Nasil Duser?" -ForegroundColor Yellow
-    Write-Host "     ISS'niz kotu yonlendirme (routing) yapiyorsa ExitLag gibi"
-    Write-Host "     araclar verilerinizi hizli sunuculardan gecirir."
-    Write-Host ""
-    Write-Host "  2. Olmazsa Olmazlar (Techolay Onerileri):" -ForegroundColor Yellow
-    Write-Host "     - PowerToys: Windows'u modifiye etmek icin en iyi Microsoft araci."
-    Write-Host "     - WizTree: Diskinizde neyin yer kapladigini saniyeler icinde bulur."
-    Write-Host "     - EarTrumpet: Her uygulama icin ayri ses kontrolu saglar."
-    Write-Host "     - FxSound: Laptop ve kalitesiz hoparlor sesini devasa artirir."
-    Write-Host ""
-    Write-Host "  [Enter] Geri don..." -ForegroundColor DarkGray
-    Read-Host | Out-Null
-}
-
 function Write-Banner {
     Clear-Host
+    $os = Get-CimInstance Win32_OperatingSystem
     Write-Host "  ================================================================" -ForegroundColor Cyan
-    Write-Host "   WinOptimizer v$($script:Version)  --  Ultimate Edition" -ForegroundColor White
+    Write-Host "   WinOptimizer v$($script:Version)  --  Techolay Treasure Hunt" -ForegroundColor White
+    Write-Host "   User: Barracuda1337 | OS: $($os.Caption)" -ForegroundColor DarkGray
     Write-Host "  ================================================================" -ForegroundColor Cyan
     Write-Host ""
 }
@@ -114,7 +95,7 @@ function Write-Banner {
 function Show-AppStore {
     while ($true) {
         Write-Banner
-        Write-Host "  --- KATEGORI SECIN (Techolay & Ninite Listesi) ---" -ForegroundColor Yellow
+        Write-Host "  --- KATEGORI SECIN ---" -ForegroundColor Yellow
         $keys = $script:SoftwareRepo.Keys | Sort-Object
         foreach ($k in $keys) { Write-Host "  [$k] $($script:SoftwareRepo[$k].Name)" -ForegroundColor White }
         Write-Host "  [Q] Geri Don" -ForegroundColor DarkGray
@@ -125,31 +106,30 @@ function Show-AppStore {
 
         if ($script:SoftwareRepo.ContainsKey($catInput)) {
             $category = $script:SoftwareRepo[$catInput]
-            while ($true) {
-                Write-Banner
-                Write-Host "  --- $($category.Name) ---" -ForegroundColor Yellow
-                Write-Host "  Numaralari yazin (or: 1,3) veya 'A' (Hepsi):" -ForegroundColor Gray
-                Write-Host ""
-                for ($i=0; $i -lt $category.Apps.Count; $i++) {
-                    Write-Host "  [$($i+1)] $($category.Apps[$i].name)" -ForegroundColor White
-                }
-                Write-Host "  [B] Geri" -NoNewline
-                Write-Host "  Secim: " -NoNewline
-                $appInput = Read-Host
-                if ($appInput.ToUpper() -eq "B") { break }
+            Write-Banner
+            Write-Host "  --- $($category.Name) ---" -ForegroundColor Yellow
+            Write-Host "  Liste: " -ForegroundColor Gray
+            for ($i=0; $i -lt $category.Apps.Count; $i++) {
+                Write-Host "  [$($i+1)] $($category.Apps[$i].name)" -ForegroundColor White
+            }
+            Write-Host ""
+            Write-Host "  Numaralari yazin (or: 1,3) veya 'A' (Hepsi). Geri icin 'B':" -ForegroundColor DarkGray
+            Write-Host "  Secim: " -NoNewline
+            $appInput = Read-Host
+            if ($appInput.ToUpper() -eq "B") { continue }
 
-                $targets = if ($appInput.ToUpper() -eq "A") { $category.Apps } else {
-                    $appInput -split "," | ForEach-Object { 
-                        $idx = 0; if([int]::TryParse($_.Trim(), [ref]$idx)) { if($idx -gt 0 -and $idx -le $category.Apps.Count) { $category.Apps[$idx-1] } }
-                    }
+            $targets = if ($appInput.ToUpper() -eq "A") { $category.Apps } else {
+                $appInput -split "," | ForEach-Object { 
+                    $idx = 0; if([int]::TryParse($_.Trim(), [ref]$idx)) { if($idx -gt 0 -and $idx -le $category.Apps.Count) { $category.Apps[$idx-1] } }
                 }
-                foreach ($app in $targets) {
-                    Write-Host "  [!] Kuruluyor: $($app.name)..." -ForegroundColor Cyan
+            }
+            foreach ($app in $targets) {
+                if ($app) {
+                    Write-Host "  [!] Yukleniyor: $($app.name)..." -ForegroundColor Cyan
                     winget install --id $app.id --silent --accept-package-agreements --accept-source-agreements
                 }
-                Write-Host "  Islem bitti. Enter..." -ForegroundColor Green; Read-Host | Out-Null
-                break
             }
+            Write-Host "  Bitti. Devam etmek icin Enter..." -ForegroundColor Green; Read-Host | Out-Null
         }
     }
 }
@@ -157,17 +137,16 @@ function Show-AppStore {
 # ============================================================
 #  MAIN LOOP
 # ============================================================
-$p = [Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()
-if (-not $p.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     Start-Process powershell -Verb RunAs -ArgumentList "-File `"$($MyInvocation.ScriptName)`""; exit
 }
 
 while ($true) {
     Write-Banner
-    Write-Host "  [1] HIZLI OPTIMIZE ET (Temizlik & Ayarlar)" -ForegroundColor Cyan
-    Write-Host "  [2] YAZILIM MAGAZASI (Techolay & Ninite)" -ForegroundColor Green
-    Write-Host "  [3] BILGI BANKASI (Ping & Arac Rehberi)" -ForegroundColor Yellow
-    Write-Host "  [4] TUM UYGULAMALARI GUNCELLE" -ForegroundColor White
+    Write-Host "  [1] HIZLI OPTIMIZE ET (Temizlik & Servisler)" -ForegroundColor Cyan
+    Write-Host "  [2] TE-HO-LAY YAZILIM MAGAZASI" -ForegroundColor Green
+    Write-Host "  [3] PING DUSURME REHBERI" -ForegroundColor Yellow
+    Write-Host "  [4] TUM UYGULAMALARI GUNCELLE (Sistem Sagligi)" -ForegroundColor White
     Write-Host "  [Q] CIKIS" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "  Seciminiz: " -NoNewline
@@ -182,7 +161,14 @@ while ($true) {
             Write-Host "  [OK] Bitti!" -ForegroundColor Green; Start-Sleep 2
         }
         "2" { Show-AppStore }
-        "3" { Show-PingGuide }
+        "3" { 
+            Clear-Host
+            Write-Host "  PING DUSURME REHBERI" -ForegroundColor Yellow
+            Write-Host "  1. ExitLag gibi araclar veriyi ISS yonlendirmesinden kurtarir."
+            Write-Host "  2. Rakipler: LagoFast, GearUp Booster, NoPing."
+            Write-Host "  3. Tavsiye: ISS'niz kotu degilse bu araclar ping artirabilir!"
+            Read-Host "  Enter..." | Out-Null
+        }
         "4" { winget upgrade --all; Write-Host "Bitti. Enter..."; Read-Host | Out-Null }
         "Q" { break }
     }
