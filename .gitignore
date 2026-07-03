@@ -1,0 +1,17 @@
+# WinOptimizer — .gitignore
+
+# Logs (kisisel log dosyalari)
+*.log
+
+# Test klasoru
+test/
+
+# Kisisel notlar
+notes.md
+TODO.local.md
+
+# PowerShell otomatik olusturulan dosyalar
+*.ps1xml
+
+# VS Code
+.vscode/
