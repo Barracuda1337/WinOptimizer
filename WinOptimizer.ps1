@@ -1,82 +1,81 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    WinOptimizer v2.7 - Expert Techolay Toolbox
+    WinOptimizer v2.8 - Clean & Independent Toolbox
 .DESCRIPTION
-    Advanced maintenance tools, categorized App Store, and deep system cleaning.
+    Professional Windows performance and software management suite.
 .AUTHOR
     Barracuda1337 (github.com/Barracuda1337)
 .VERSION
-    2.7.0
+    2.8.0
 #>
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'SilentlyContinue'
 
 # ============================================================
-#  THE EXPERT SOFTWARE REPOSITORY (V2.7)
+#  PROFESSIONAL SOFTWARE REPOSITORY (V2.8)
 # ============================================================
-$script:Version = "2.7.0"
+$script:Version = "2.8.0"
 $script:SoftwareRepo = @{
     "1" = @{ 
-        Name = "Tarayicilar (Browsers)"; 
+        Name = "Web Tarayicilar"; 
         Apps = @(
             @{ name = "Google Chrome"; id = "Google.Chrome" },
             @{ name = "Brave Browser"; id = "Brave.Brave" },
-            @{ name = "Zen Browser"; id = "Zen-Browser.Zen" },
-            @{ name = "Arc Browser"; id = "TheBrowserCompany.Arc" }
+            @{ name = "Mozilla Firefox"; id = "Mozilla.Firefox" },
+            @{ name = "Zen Browser"; id = "Zen-Browser.Zen" }
         )
     };
     "2" = @{ 
-        Name = "Sistem Bakim & Onarim (Expert)"; 
+        Name = "Sistem Bakim & Donanim"; 
         Apps = @(
             @{ name = "DDU (Driver Uninstaller)"; id = "Wagnardsoft.DisplayDriverUninstaller" },
-            @{ name = "Revo Uninstaller (Derin Sil)"; id = "RevoUninstaller.RevoUninstaller" },
-            @{ name = "Microsoft PC Manager"; id = "Microsoft.PCManager" },
-            @{ name = "Rufus (ISO-to-USB)"; id = "PeteBatard.Rufus" },
-            @{ name = "BleachBit (Derin Temizlik)"; id = "BleachBit.BleachBit" },
-            @{ name = "Autoruns (Sysinternals)"; id = "Microsoft.Sysinternals.Autoruns" }
+            @{ name = "Revo Uninstaller"; id = "RevoUninstaller.RevoUninstaller" },
+            @{ name = "MS PC Manager"; id = "Microsoft.PCManager" },
+            @{ name = "Rufus (USB Boot)"; id = "PeteBatard.Rufus" },
+            @{ name = "HWiNFO64"; id = "REALiX.HWiNFO64" },
+            @{ name = "CPU-Z"; id = "CPUID.CPU-Z" }
         )
     };
     "3" = @{ 
-        Name = "Donanim Test & Analiz"; 
-        Apps = @(
-            @{ name = "CPU-Z"; id = "CPUID.CPU-Z" },
-            @{ name = "GPU-Z"; id = "TechPowerUp.GPU-Z" },
-            @{ name = "HWiNFO64"; id = "REALiX.HWiNFO64" },
-            @{ name = "CrystalDiskInfo"; id = "CrystalDewWorld.CrystalDiskInfo" },
-            @{ name = "FurMark (GPU Stress)"; id = "Geeks3D.FurMark" },
-            @{ name = "Speccy (Hardware Info)"; id = "Piriform.Speccy" }
-        )
-    };
-    "4" = @{ 
-        Name = "Uretkenlik & Medya"; 
+        Name = "Uretkenlik & Araclar"; 
         Apps = @(
             @{ name = "Everything (Hizli Arama)"; id = "voidtools.Everything" },
             @{ name = "PowerToys"; id = "Microsoft.PowerToys" },
             @{ name = "Notepad++"; id = "Notepad++.Notepad++" },
-            @{ name = "VLC Media Player"; id = "VideoLAN.VLC" },
-            @{ name = "Spotify"; id = "Spotify.Spotify" }
+            @{ name = "7-Zip"; id = "7zip.7zip" },
+            @{ name = "WizTree (Disk)"; id = "AntibodySoftware.WizTree" }
+        )
+    };
+    "4" = @{ 
+        Name = "Medya & Iletisim"; 
+        Apps = @(
+            @{ name = "VLC Player"; id = "VideoLAN.VLC" },
+            @{ name = "Spotify"; id = "Spotify.Spotify" },
+            @{ name = "Discord"; id = "Discord.Discord" },
+            @{ name = "ShareX (Ekran)"; id = "ShareX.ShareX" }
         )
     };
     "5" = @{ 
-        Name = "Iletisimi & Gaming"; 
+        Name = "Oyun & Baglanti Hizlandirma"; 
         Apps = @(
-            @{ name = "Discord"; id = "Discord.Discord" },
+            @{ name = "ExitLag"; id = "ExitLag.ExitLag" },
+            @{ name = "LagoFast"; id = "LagoFast.LagoFast" },
             @{ name = "Steam"; id = "Valve.Steam" },
-            @{ name = "ExitLag (Ping)"; id = "ExitLag.ExitLag" },
-            @{ name = "LagoFast (Ping)"; id = "LagoFast.LagoFast" }
+            @{ name = "Heroic Games Launcher"; id = "HeroicGamesLauncher.HeroicGamesLauncher" }
         )
     }
 }
 
 # ============================================================
-#  CORE FUNCTIONS
+#  LOGIC & ENGINE
 # ============================================================
 function Write-Banner {
     Clear-Host
     Write-Host "  ================================================================" -ForegroundColor Cyan
-    Write-Host "   WinOptimizer v$($script:Version)  --  EXPERT EDITION" -ForegroundColor White
+    Write-Host "   WinOptimizer v$($script:Version)  --  Windows Management Suite" -ForegroundColor White
+    Write-Host "   Maintainer: Barracuda1337" -ForegroundColor DarkGray
     Write-Host "  ================================================================" -ForegroundColor Cyan
     Write-Host ""
 }
@@ -84,7 +83,7 @@ function Write-Banner {
 function Show-AppStore {
     while ($true) {
         Write-Banner
-        Write-Host "  --- UZMAN YAZILIM KATEGORILERI ---" -ForegroundColor Yellow
+        Write-Host "  --- YAZILIM KATEGORILERI ---" -ForegroundColor Yellow
         $keys = $script:SoftwareRepo.Keys | Sort-Object
         foreach ($k in $keys) { Write-Host "  [$k] $($script:SoftwareRepo[$k].Name)" -ForegroundColor White }
         Write-Host "  [Q] Geri Don" -ForegroundColor DarkGray
@@ -101,7 +100,7 @@ function Show-AppStore {
                 Write-Host "  [$($i+1)] $($category.Apps[$i].name)" -ForegroundColor White
             }
             Write-Host ""
-            Write-Host "  (or: 1,3) 'A' (Hepsi) | [B] Geri" -ForegroundColor DarkGray
+            Write-Host "  Numaralari yazin (or: 1,3) veya 'A' (Hepsi). [B] Geri." -ForegroundColor DarkGray
             Write-Host "  Secim: " -NoNewline
             $appInput = Read-Host
             if ($appInput.ToUpper() -eq "B") { continue }
@@ -113,11 +112,11 @@ function Show-AppStore {
             }
             foreach ($app in $targets) {
                 if ($app) {
-                    Write-Host "  [!] Yukleniyor: $($app.name)..." -ForegroundColor Cyan
+                    Write-Host "  [!] Kuruluyor: $($app.name)..." -ForegroundColor Cyan
                     winget install --id $app.id --silent --accept-package-agreements --accept-source-agreements
                 }
             }
-            Write-Host "  Islem tamam. Enter..." -ForegroundColor Green; Read-Host | Out-Null
+            Write-Host "  Bitti. Devam etmek için Enter..." -ForegroundColor Green; Read-Host | Out-Null
         }
     }
 }
@@ -126,14 +125,15 @@ function Show-AppStore {
 #  MAIN LOOP
 # ============================================================
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    Start-Process powershell -Verb RunAs -ArgumentList "-File `"$($MyInvocation.ScriptName)`""; exit
+    Start-Process powershell -Verb RunAs -ArgumentList "-File `"$($MyInvocation.ScriptName)`"" ; exit
 }
 
 while ($true) {
     Write-Banner
-    Write-Host "  [1] TUM OPTIMIZASYONLARI UYGULA" -ForegroundColor Cyan
-    Write-Host "  [2] UZMAN YAZILIM MAGAZASI (Techolay Meta)" -ForegroundColor Green
-    Write-Host "  [3] TUM UYGULAMALARI GUNCELLE (Sistem Sagligi)" -ForegroundColor White
+    Write-Host "  [1] SISTEMI OPTIMIZE ET (Hizli)" -ForegroundColor Cyan
+    Write-Host "  [2] UYGULAMA KURULUM MERKEZI" -ForegroundColor Green
+    Write-Host "  [3] SISTEM BILGI BANKASI (Ping & Performans)" -ForegroundColor Yellow
+    Write-Host "  [4] TUM UYGULAMALARI GUNCELLE" -ForegroundColor White
     Write-Host "  [Q] CIKIS" -ForegroundColor DarkGray
     Write-Host ""
     Write-Host "  Seciminiz: " -NoNewline
@@ -141,16 +141,22 @@ while ($true) {
 
     switch ($choice) {
         "1" { 
-            Write-Host "  [!] Calisiyor..." -ForegroundColor Cyan
-            # Telemetry & Power
+            Write-Host "  [!] Islemler yapılıyor..." -ForegroundColor Cyan
             Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -Type DWord -ErrorAction SilentlyContinue
             powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
-            # Clean
             Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue 
-            Write-Host "  [OK] Bitti!" -ForegroundColor Green; Start-Sleep 2
+            Write-Host "  [OK] Basariyla tamamlandi!" -ForegroundColor Green; Start-Sleep 2
         }
         "2" { Show-AppStore }
-        "3" { winget upgrade --all; Write-Host "Bitti. Enter..."; Read-Host | Out-Null }
+        "3" { 
+            Clear-Host
+            Write-Host "  --- SISTEM & PING REHBERI ---" -ForegroundColor Yellow
+            Write-Host "  * Ping Dusurucu Programlar: Kotu ISS yonlendirmelerini baypas eder."
+            Write-Host "  * Power Throttling: Islemci gucunun kisilmasini onler."
+            Write-Host "  * Telemetri: Veri gonderimini durdurarak CPU ve Agi rahatlatir."
+            Read-Host "  Geri donmek icin Enter..." | Out-Null
+        }
+        "4" { winget upgrade --all; Write-Host "Bitti. Enter..."; Read-Host | Out-Null }
         "Q" { break }
     }
 }
