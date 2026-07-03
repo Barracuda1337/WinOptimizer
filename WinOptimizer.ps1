@@ -118,7 +118,7 @@ function Write-Banner {
     Write-Host "  ================================================================" -ForegroundColor Cyan
     Write-Host "   WinOptimizer v$($script:Version)  --  Windows Optimizer" -ForegroundColor White
     Write-Host "   Compatible: Windows 10 / 11 (x64) | PS 5.1+" -ForegroundColor DarkGray
-    Write-Host "   github.com/your-username/WinOptimizer" -ForegroundColor DarkGray
+    Write-Host "   Yunus Karatas (github.com/Barracuda1337)" -ForegroundColor DarkGray
     Write-Host "  ================================================================" -ForegroundColor Cyan
     Write-Host ""
 
@@ -853,7 +853,7 @@ function Export-HtmlReport {
   </div>
 
 </div>
-<div class="footer">WinOptimizer v$($script:Version) -- github.com/your-username/WinOptimizer -- MIT License</div>
+<div class="footer">WinOptimizer v$($script:Version) -- github.com/Barracuda1337/WinOptimizer -- MIT License</div>
 </body>
 </html>
 "@
@@ -878,9 +878,10 @@ function Show-Summary {
     $total = $script:Results.Count
 
     Write-Host ""
-    Write-Host "  ================================================================" -ForegroundColor Cyan
-    Write-Host "                      OPTIMIZASYON RAPORU" -ForegroundColor White
-    Write-Host "  ================================================================" -ForegroundColor Cyan
+    Write-Host "  =============================================================" -ForegroundColor Cyan
+    Write-Host "   WinOptimizer v$($script:Version)  --  By Yunus Karatas" -ForegroundColor White
+    Write-Host "   github.com/Barracuda1337/WinOptimizer" -ForegroundColor DarkGray
+    Write-Host "  =============================================================" -ForegroundColor Cyan
 
     if ($Before -and $After) {
         $ramGain  = [math]::Round($After.FreeRAM_GB - $Before.FreeRAM_GB, 2)

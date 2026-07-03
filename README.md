@@ -1,155 +1,98 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/PowerShell-5.1%2B-blue?logo=powershell&logoColor=white" />
-<img src="https://img.shields.io/badge/Windows-10%2F11-0078D6?logo=windows&logoColor=white" />
-<img src="https://img.shields.io/badge/License-MIT-green" />
-<img src="https://img.shields.io/badge/Version-1.0.0-orange" />
+# ⚡ WinOptimizer v2.0
 
-# ⚡ WinOptimizer
+**Modern Windows Performance & Stability Engineering Tool**
 
-**Windows Performance & Stability Optimizer**
+[![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-blue?style=for-the-badge&logo=powershell&logoColor=white)](https://microsoft.com/powershell)
+[![Windows](https://img.shields.io/badge/Windows-10%2F11-0078D6?style=for-the-badge&logo=windows&logoColor=white)](https://windows.com)
+[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+[![Release](https://img.shields.io/badge/Version-2.0.0-orange?style=for-the-badge)](https://github.com/Barracuda1337/WinOptimizer)
 
-*Tek script ile bilgisayarınızı hızlandırın — fare takılması, Chrome donması, yüksek disk kullanımı, ağ sorunlarına toplu çözüm.*
+---
+
+[🇺🇸 English](#english) | [🇹🇷 Türkçe](#türkçe)
+
+---
 
 </div>
 
+<a name="english"></a>
+## 🚀 Features
+
+WinOptimizer is a professional-grade PowerShell script suite designed to eliminate common Windows performance bottlenecks. It focuses on reducing input latency, cleaning system clutter, and optimizing network stack.
+
+### 🛠️ Core Modules
+- **Low Latency Input:** Fixes mouse stuttering by repairing HID drivers and disabling USB Selective Suspend.
+- **Advanced Cleanup:** Deep cleans temp files, browser caches (Chrome, Firefox, Edge), and Windows Update logs.
+- **Gaming Optimization:** Enables Game Mode, Hardware Accelerated GPU Scheduling, and VRR.
+- **Network Performance:** Optimizes DNS (Cloudflare/Google), disables Network Throttling, and fixes 100Mbps Ethernet caps.
+- **System Stability:** Automatically creates restore points and provides detailed HTML performance reports.
+
 ---
 
-## 🚀 Hızlı Başlangıç
+<a name="türkçe"></a>
+## 🇹🇷 Türkçe Tanıtım
 
-PowerShell'i **Yönetici olarak** açın ve çalıştırın:
+**WinOptimizer**, Windows'unuzun en yüksek verimlilikle çalışması için tasarlanmış kapsamlı bir optimizasyon aracıdır. Özellikle oyuncular, yazılımcılar ve bilgisayarından maksimum hız bekleyen kullanıcılar için geliştirilmiştir.
+
+### ✨ Öne Çıkanlar
+- **Fare Takılmasını Giderir:** Fare sürücülerini onarır ve USB güç tasarrufunu kapatarak akıcı hareket sağlar.
+- **Derinlemesine Temizlik:** Tarayıcı önbelleklerinden Windows Update kalıntılarına kadar Gigabaytlarca yer açar.
+- **Düşük Gecikme:** İnternet ve oyunlardaki tepki süresini (ping) iyileştirmek için ağ ayarlarını optimize eder.
+- **HTML Raporu:** İşlem bittiğinde ne kadar RAM/Disk kazandığınızı gösteren şık bir rapor sunar.
+
+---
+
+## 📸 HTML Report Preview
+> *The script generates a beautiful dark-themed dashboard showing before/after results.*
+
+---
+
+## ⚡ Quick Start
+
+1. Open **PowerShell as Administrator**.
+2. Run the following command:
 
 ```powershell
-# Interaktif menu
+# Clone or Download, then run:
+Set-ExecutionPolicy Bypass -Scope Process -Force
 .\WinOptimizer.ps1
+```
 
-# Tüm optimizasyonları uygula (hızlı)
+Or run everything silently:
+```powershell
 .\WinOptimizer.ps1 -Silent
 ```
 
-Veya tek satırda indirip çalıştırın (PowerShell admin):
+---
 
-```powershell
-irm https://raw.githubusercontent.com/YOUR_USERNAME/WinOptimizer/main/WinOptimizer.ps1 | iex
-```
+## ⚙️ Configuration
+You can customize the optimization behavior in `config.json`:
+- **startup:** List of applications to disable on startup.
+- **bloatware:** Built-in Windows apps to be safely removed.
+- **dns:** Custom DNS server settings.
 
 ---
 
-## 🛠️ Modules
-
-| # | Modül | Açıklama |
-|---|-------|----------|
-| 1 | **Restore Point** | İşlem öncesi sistem geri yükleme noktası oluşturur |
-| 2 | **Startup Cleaner** | Gereksiz başlangıç programlarını devre dışı bırakır |
-| 3 | **Mouse Driver Repair** | `Unknown` durumdaki HID sürücülerini yeniden yükler |
-| 4 | **USB Selective Suspend** | USB güç tasarrufunu kapatır (fare takılma düzeltmesi) |
-| 5 | **Power Plan** | Güç planını Yüksek Performans'a alır, Network Throttling'i kaldırır |
-| 6 | **SysMain / Superfetch** | SSD sistemlerde gereksiz disk yazımını durdurur |
-| 7 | **Temp Cleanup** | `%TEMP%`, `C:\Windows\Temp`, Windows Update cache temizler |
-| 8 | **DNS Optimizer** | DNS'i Cloudflare (1.1.1.1) + Google (8.8.8.8) olarak ayarlar |
-| 9 | **Ethernet Gigabit** | Gigabit Lite'ı kapatır, 1 Gbps Full Duplex'e ayarlar |
-| C | **Chrome Optimizer** | GPU cache, Shader cache temizler, HW Acceleration aktif eder |
+## 🛡️ Safety & Rollback
+WinOptimizer prioritizes safety:
+1. **Restore Point:** A system restore point is created before any change.
+2. **Log System:** Every action is logged to `%TEMP%\WinOptimizer_DATE.log`.
+3. **No Irreversible Changes:** Most optimizations can be reverted via standard Windows settings.
 
 ---
 
-## 📋 Gereksinimler
+## 🤝 Contributing
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-- Windows 10 / 11
-- PowerShell 5.1+
-- **Yönetici (Administrator) yetkisi**
-
----
-
-## 🎯 Hangi Sorunları Çözer?
-
-| Sorun | Modül |
-|-------|-------|
-| Açılışta fare takılıyor | Mouse Driver Repair + USB Suspend |
-| Chrome'da video donuyor | Chrome Optimizer + Network Throttling |
-| ChatGPT/AI araçları kasıyor | DNS Optimizer + Network Throttling |
-| Bilgisayar genel yavaşlık | Startup Cleaner + SysMain + Temp Cleanup |
-| Ethernet 100 Mbps'te takılı | Ethernet Gigabit Fix |
-| Oyun/GPU performans düşüklüğü | Power Plan + GPU Priority |
-
----
-
-## 📊 Örnek Çıktı
-
-```
-  ██╗    ██╗██╗███╗   ██╗ ██████╗ ██████╗ ████████╗██╗███╗   ███╗██╗███████╗███████╗██████╗
-  ...
-
-  ┌─ SISTEM GERI YUKLEME NOKTASI ──────────────────────────────────
-  ✔  Geri yukleme noktasi olusturuldu
-
-  ┌─ BASLANGIC PROGRAMI OPTIMIZASYONU ─────────────────────────────
-  ✔  Devre disi: DiscordPTB (Discord zaten var)
-  ✔  Devre disi: Honeygain (arka planda bant genisligi kullanir)
-  ○  Bulunamadi / zaten kapali: electron.app.U.GG
-
-  ┌─ GECICI DOSYA TEMIZLIGI ────────────────────────────────────────
-  ✔  Kullanici Temp: 1369 MB temizlendi
-  ✔  Windows Temp: 31 MB temizlendi
-  ✔  Toplam temizlenen: ~1400 MB | C: bos alan: 44.8 GB
-```
-
----
-
-## ⚙️ Gelişmiş Kullanım
-
-```powershell
-# Özel başlangıç programı da kapat
-.\WinOptimizer.ps1
-# Menu'den [2] seçin, script customApps array'ine eklediğiniz adları da kapatır
-
-# Log dosyasına bak
-# Log otomatik olarak %TEMP%\WinOptimizer_TARIH.log konumuna kaydedilir
-```
-
----
-
-## 🔄 Geri Alma
-
-Herhangi bir sorun oluşursa:
-
-```
-Başlat → "Sistem Geri Yükleme" → "WinOptimizer" adlı nokta → Geri Yükle
-```
-
----
-
-## 📝 Changelog
-
-### v1.0.0
-- İlk sürüm
-- 10 optimizasyon modülü
-- Interactive menu + Silent mode
-- Otomatik restore point
-- Renkli terminal arayüzü
-- Log dosyası desteği
-
----
-
-## 🤝 Katkı
-
-PR ve issue'lar memnuniyetle karşılanır!
-
-1. Fork edin
-2. Feature branch oluşturun (`git checkout -b feature/yeni-modul`)
-3. Commit edin (`git commit -m 'feat: yeni modul eklendi'`)
-4. Push edin (`git push origin feature/yeni-modul`)
-5. Pull Request açın
-
----
-
-## 📄 Lisans
-
-MIT License — özgürce kullanın, paylaşın, değiştirin.
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
 <div align="center">
 
-Made with ❤️ for the Windows community
+Made with 🛠️ by [Barracuda1337 (Yunus Karataş)](https://github.com/Barracuda1337)
 
 </div>
