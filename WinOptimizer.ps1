@@ -239,14 +239,10 @@ function Show-KnowledgeBase {
 
 function Export-HtmlReport {
     param($Before, $After)
-    if ($null -eq $script:Results -or $script:Results.Count -eq 0) {
-        # Eğer hiç işlem yapılmadıysa örnek bir satır ekleyelim
-        Add-Result "Genel" "Rapor Görüntüleme" $true "İşlem listesi hazırlandı."
-    }
-
+    Write-Host "`n  [!] Rapor hazirlaniyor ve aciliyor..." -ForegroundColor Cyan
+    
     $duration = [math]::Round(((Get-Date) - $script:StartTime).TotalSeconds, 1)
     $okCount   = @($script:Results | Where-Object { $_.Status -eq "OK" }).Count
-    
     $ramGain  = if ($Before -and $After) { [math]::Round($After.FreeRAM_GB - $Before.FreeRAM_GB, 2) } else { 0 }
     $diskGain = if ($Before -and $After) { [math]::Round($After.FreeDisk_GB - $Before.FreeDisk_GB, 2) } else { 0 }
 
@@ -257,50 +253,53 @@ function Export-HtmlReport {
 
     $html = @"
 <!DOCTYPE html>
-<html lang="tr">
+<html>
 <head>
-<meta charset="UTF-8">
-<style>
-  :root { --bg: #0d1117; --surface: #161b22; --border: #30363d; --text: #e6edf3; --dim: #8b949e; --green: #3fb950; --red: #f85149; --blue: #58a6ff; }
-  body { background:var(--bg); color:var(--text); font-family: 'Segoe UI', sans-serif; padding: 40px; }
-  .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }
-  .card { background:var(--surface); border:1px solid var(--border); padding:20px; border-radius:12px; }
-  .val { font-size:28px; font-weight:bold; color:var(--blue); }
-  .lbl { font-size:12px; color:var(--dim); text-transform:uppercase; }
-  table { width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
-  th, td { padding:12px 16px; text-align:left; border-bottom:1px solid var(--border); }
-  th { background: rgba(255,255,255,0.05); color:var(--dim); }
-  .badge { padding:2px 8px; border-radius:6px; font-size:11px; font-weight:bold; }
-  .badge.ok { background:#3fb95044; color:var(--green); }
-  .badge.fail { background:#f8514944; color:var(--red); }
-</style>
+    <meta charset="UTF-8">
+    <title>WinOptimizer Premium Report</title>
+    <style>
+        :root { --bg: #030712; --card: #111827; --accent: #3b82f6; --green: #10b981; --red: #ef4444; --text: #f3f4f6; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui; padding: 40px; margin: 0; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #374151; padding-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
+        .card { background: var(--card); border: 1px solid #1f2937; border-radius: 16px; padding: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .val { font-size: 32px; font-weight: 800; color: var(--accent); }
+        .lbl { font-size: 13px; color: #9ca3af; text-transform: uppercase; margin-top: 8px; letter-spacing: 0.1em; }
+        table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--card); border-radius: 16px; overflow: hidden; border: 1px solid #1f2937; }
+        th { background: #1f2937; padding: 16px; text-align: left; font-size: 13px; color: #9ca3af; text-transform: uppercase; }
+        td { padding: 16px; border-bottom: 1px solid #1f2937; font-size: 14px; }
+        .badge { padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge.ok { background: #064e3b; color: #34d399; }
+        .badge.fail { background: #7f1d1d; color: #f87171; }
+    </style>
 </head>
 <body>
-  <h1 style="color:var(--blue)">WinOptimizer v$($script:Version) Raporu</h1>
-  <p style="color:var(--dim)">$(Get-Date -Format 'dd MMMM yyyy HH:mm') | Süre: ${duration}s</p>
-  
-  <div class="grid">
-    <div class="card"><div class="val">$okCount</div><div class="lbl">Tamamlanan</div></div>
-    <div class="card"><div class="val" style="color:var(--green)">+$diskGain GB</div><div class="lbl">Disk Kazancı</div></div>
-    <div class="card"><div class="val" style="color:var(--green)">+$ramGain GB</div><div class="lbl">RAM Özgürlüğü</div></div>
-    <div class="card"><div class="val">$duration s</div><div class="lbl">İşlem Süresi</div></div>
-  </div>
-
-  <table>
-    <thead><tr><th>Kategori</th><th>İşlem</th><th>Durum</th><th>Detay</th></tr></thead>
-    <tbody>$rowsHtml</tbody>
-  </table>
+    <div class="container">
+        <div class="header">
+            <div><h1 style="margin:0; font-size:32px;">WinOptimizer <span style="color:var(--accent)">PRO</span></h1></div>
+            <div style="text-align:right; color:#9ca3af">$(Get-Date -Format 'F')</div>
+        </div>
+        <div class="grid">
+            <div class="card"><div class="val">$okCount</div><div class="lbl">İşlem Tamam</div></div>
+            <div class="card"><div class="val" style="color:var(--green)">+$diskGain GB</div><div class="lbl">Disk Kazancı</div></div>
+            <div class="card"><div class="val" style="color:var(--green)">+$ramGain GB</div><div class="lbl">RAM Özgürlüğü</div></div>
+            <div class="card"><div class="val">${duration}s</div><div class="lbl">Süre</div></div>
+        </div>
+        <table>
+            <thead><tr><th>Kategori</th><th>Girdi</th><th>Durum</th><th>Detay</th></tr></thead>
+            <tbody>$rowsHtml</tbody>
+        </table>
+    </div>
 </body>
 </html>
 "@
     [System.IO.File]::WriteAllText($script:ReportPath, $html, [System.Text.Encoding]::UTF8)
     
-    # Garantili açma yöntemi (explorer.exe fallback)
-    try {
-        Start-Process "explorer.exe" $script:ReportPath
-    } catch {
-        Invoke-Item $script:ReportPath
-    }
+    # En üst düzey Windows dosya açma yöntemi
+    $shell = New-Object -ComObject Shell.Application
+    $shell.Open($script:ReportPath)
 }
 
 function Invoke-AllModules {
