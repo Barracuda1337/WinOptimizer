@@ -68,6 +68,6 @@ Eğer projeyi yerel olarak saklamak ve kurcalamak isterseniz:
 
 ---
 
-**Maintainer:** Barracuda1337  
-**Build:** v3.2.2.0407  
-**Status:** Stable & Verified ✔️
+<p align="center">
+  <b>Maintainer:</b> Barracuda1337 | <b>Build:</b> v3.2.2.0407 | <b>Status:</b> Stable & Verified ✔️
+</p>
