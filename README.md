@@ -24,8 +24,10 @@ WinOptimizer has evolved into the **Ultimate Windows Management Suite**.
 ### 🛠️ Key Capabilities
 - **⚡ FastMenu Navigation:** Categorized menus now respond instantly to single-key input (No Enter required).
 - **📚 The Encyclopedia:** 10+ categories with 100+ curated elite tools (DDU, BCUninstaller, PowerToys, etc.).
+- **⚙️ Modular Optimization:** granular control over 15+ modules including SysMain, Game Mode, and SSD tweaks.
 - **🔍 Winget Search Engine:** Search and install over 10,000+ apps directly from the CLI.
-- **⚡ Pro Optimization:** Telemetry removal, power management, and advanced system maintenance.
+- **📅 Weekly Maintenance:** Auto-schedule system cleanup for 03:00 AM every Sunday.
+- **📖 Knowledge Base:** Expert guidance on hardware lag, networking, and system health.
 - **🚀 One-Line Execution:** Instant setup on any fresh Windows installation.
 
 ---
@@ -35,11 +37,13 @@ WinOptimizer has evolved into the **Ultimate Windows Management Suite**.
 
 WinOptimizer artık sadece bir temizleyici değil, **Eksiksiz bir Yazılım Ansiklopedisi.**
 
-### ✨ Öne Çıkan Özellikler (v3.1.0)
+### ✨ Öne Çıkan Özellikler (v3.2.0)
 - **⚡ FastMenu Navigasyon:** Menüler arasında `Enter`a basmadan tuşa bastığınız anda anlık geçiş yapın.
 - **📚 Dev Yazılım Kütüphanesi:** 10 ana kategoride toplanmış 100'den fazla profesyonel araç.
+- **⚙️ Modüler Optimizasyon:** 15+ farklı optimizasyon seçeneği ile tam denetim (SysMain, Oyun Modu, Bloatware vb.).
+- **📖 Bilgi Bankası:** Fare gecikmesi, ping ve sistem temizliği hakkında uzman rehberi.
+- **📅 Zamanlanmış Bakim:** Her Pazar saat 03:00'da otomatik bakım yapması için görev ekleme.
 - **🔍 Gelişmiş Arama:** Listede olmayan her şeyi `winget` üzerinden saniyeler içinde bulun ve kurun.
-- **⚡ Rakipsiz Performans:** Tek tuşla telemetri temizliği ve sistem hızlandırma.
 
 ---
 
