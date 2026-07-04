@@ -16,7 +16,17 @@ Modern, hızlı ve modüler Windows optimizasyon aracı. Tek bir PowerShell scri
 
 ---
 
-## 🛠️ Kullanım ve Kurulum
+## ⚡ Tek Komutla Çalıştır (Hızlı Başlangıç)
+
+Hiçbir dosya indirmeden, sadece PowerShell (Yönetici) ekranına aşağıdaki komutu yapıştırarak anında başlayabilirsiniz:
+
+```powershell
+irm https://raw.githubusercontent.com/Barracuda1337/WinOptimizer/main/WinOptimizer.ps1 | iex
+```
+
+---
+
+## 🛠️ Kullanım ve Kurulum (Manuel)
 
 1. **Powershell (Yönetici)** olarak açın.
 2. Script dizinine gidin.
