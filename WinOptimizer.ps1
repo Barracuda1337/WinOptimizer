@@ -152,7 +152,10 @@ function Repair-MouseDrivers {
     Write-Section "FARE GECİKMESİ"
     Get-PnpDevice -Class Mouse | ForEach-Object {
         $regKey = "HKLM:\SYSTEM\CurrentControlSet\Enum\$($_.InstanceId)\Device Parameters"
-        if (Test-Path $regKey) { Set-ItemProperty -Path $regKey -Name "EnhancedPowerManagementEnabled" -Value 0 -Type DWord -ErrorAction SilentlyContinue }
+        if (Test-Path $regKey) { 
+            # Somut Kararlılık: Anahtarı her ihtimale karşı doğrula
+            Set-ItemProperty -Path $regKey -Name "EnhancedPowerManagementEnabled" -Value 0 -Type DWord -ErrorAction SilentlyContinue 
+        }
     }
     Write-Status "HID güç yönetimi optimize edildi" "OK"
     Add-Result "Donanım" "Fare Gecikmesi" $true
@@ -167,6 +170,12 @@ function Set-HighPerformancePlan {
 
 function Enable-GameMode {
     Write-Section "OYUN MODU"
+    $regPaths = @(
+        "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers",
+        "HKCU:\Software\Microsoft\GameBar"
+    )
+    foreach ($path in $regPaths) { if (-not (Test-Path $path)) { New-Item -Path $path -Force | Out-Null } }
+    
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name "HwSchMode" -Value 2 -ErrorAction SilentlyContinue
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\GameBar" -Name "AllowAutoGameMode" -Value 1 -ErrorAction SilentlyContinue
     Write-Status "Game Mode ve HAGS optimize edildi" "OK"
@@ -175,7 +184,14 @@ function Enable-GameMode {
 
 function Clear-TempFiles {
     Write-Section "TEMİZLİK"
-    Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
+    # Somut Kararlılık: Kilitli dosyalar yüzünden tüm işlemin durmasını engellemek için öğeleri tek tek tara
+    Get-ChildItem "$env:TEMP\*" -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+        try {
+            Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+        } catch {
+            # Kilitli dosyalar sessizce atlanır, işlem devam eder
+        }
+    }
     Write-Status "Geçici dosyalar temizlendi" "OK"
     Add-Result "Disk" "Geçici Dosyalar" $true
 }
@@ -190,8 +206,14 @@ function Set-OptimalDns {
 
 function Remove-Bloatware {
     Write-Section "BLOATWARE"
+    # Somut Performans İyileştirmesi: Paketleri bir kez yükle, hafızada filtrele
+    $allPackages = Get-AppxPackage
     foreach ($p in $script:Config.bloatware.packages) {
-        Get-AppxPackage -Name $p | Remove-AppxPackage -ErrorAction SilentlyContinue
+        $app = $allPackages | Where-Object { $_.Name -eq $p }
+        if ($app) {
+            $app | Remove-AppxPackage -ErrorAction SilentlyContinue
+            Write-Status "Kaldırıldı: $p" "OK"
+        }
     }
     Write-Status "Gereksiz paketler temizlendi" "OK"
     Add-Result "Sistem" "Bloatware Kaldırma" $true
@@ -199,7 +221,9 @@ function Remove-Bloatware {
 
 function Optimize-VisualEffects {
     Write-Section "GÖRSEL"
-    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -ErrorAction SilentlyContinue
+    $path = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects"
+    if (-not (Test-Path $path)) { New-Item -Path $path -Force | Out-Null }
+    Set-ItemProperty -Path $path -Name "VisualFXSetting" -Value 2 -ErrorAction SilentlyContinue
     Write-Status "Performans modu ayarlandı" "OK"
     Add-Result "Görsel" "Performans Modu" $true
 }
@@ -250,8 +274,13 @@ function Optimize-AdvancedTweaks {
     Write-Status "SSD TRIM doğrulandı ve Aygıt Taraması optimize edildi" "OK"
     
     # Arka Plan Uygulamaları & Saydamlık
-    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" -Name "GlobalUserDisabled" -Value 1 -ErrorAction SilentlyContinue
-    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Value 0 -ErrorAction SilentlyContinue
+    $bgPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications"
+    $thPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+    if (-not (Test-Path $bgPath)) { New-Item -Path $bgPath -Force | Out-Null }
+    if (-not (Test-Path $thPath)) { New-Item -Path $thPath -Force | Out-Null }
+    
+    Set-ItemProperty -Path $bgPath -Name "GlobalUserDisabled" -Value 1 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path $thPath -Name "EnableTransparency" -Value 0 -ErrorAction SilentlyContinue
     Write-Status "Arka Plan Uygulamaları ve Saydamlık efektleri kapatıldı" "OK"
 
     # PCIe & Hızlı Kapanma
