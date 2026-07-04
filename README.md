@@ -1,67 +1,58 @@
-<div align="center">
+# 🚀 WinOptimizer v3.2.2 - Ultra-Stable Expert Edition
 
-# ⚡ WinOptimizer v3.1.0
-
-**FastMenu Edition: The Ultimate Windows Encyclopedia**
-
-[![PowerShell](https://img.shields.io/badge/PowerShell-5.1%2B-blue?style=for-the-badge&logo=powershell&logoColor=white)](https://microsoft.com/powershell)
-[![Version](https://img.shields.io/badge/Release-v3.1.0-orange?style=for-the-badge)](https://github.com/Barracuda1337/WinOptimizer/releases)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
+Modern, hızlı ve modüler Windows optimizasyon aracı. Tek bir PowerShell scripti ile sisteminizi profesyonel bir seviyeye taşıyın.
 
 ---
 
-[🇺🇸 English](#english) | [🇹🇷 Türkçe](#türkçe)
+## 🌟 Öne Çıkan Özellikler
+
+- **⚡ FastMenu Pro:** Anlık klavye tepkisi ile ultra hızlı navigasyon.
+- **🛠️ Expert Modules:** Fare gecikme onarımı, yüksek performans planları ve oyun modu optimizasyonu.
+- **📦 Yazılım Ansiklopedisi (Store):** Winget destekli, kategorize edilmiş yazılım kütüphanesi.
+- **📊 Premium HTML Raporu:** İşlem sonrası sistemdeki kazancı gösteren Dashboard tasarımı.
+- **🛡️ Gelişmiş Tweaks (YENİ):** Telemetry kapatma, SSD TRIM kontrolü ve P2P güncelleme engelleme.
+- **💾 Derin Depolama:** Kış uykusu ve ayrılmış depolama yönetimi ile GB'larca yer açma.
+- **🗓️ Otomatik Bakım:** Haftalık otomatik temizlik görevi tanımlama.
 
 ---
 
-</div>
+## 🛠️ Kullanım ve Kurulum
 
-<a name="english"></a>
-## 🚀 Features (v3.1.0 - FastMenu)
-
-WinOptimizer has evolved into the **Ultimate Windows Management Suite**.
-
-### 🛠️ Key Capabilities
-- **⚡ FastMenu Navigation:** Categorized menus now respond instantly to single-key input (No Enter required).
-- **📚 The Encyclopedia:** 10+ categories with 100+ curated elite tools (DDU, BCUninstaller, PowerToys, etc.).
-- **⚙️ Modular Optimization:** granular control over 15+ modules including SysMain, Game Mode, and SSD tweaks.
-- **🔍 Winget Search Engine:** Search and install over 10,000+ apps directly from the CLI.
-- **📅 Weekly Maintenance:** Auto-schedule system cleanup for 03:00 AM every Sunday.
-- **📖 Knowledge Base:** Expert guidance on hardware lag, networking, and system health.
-- **🚀 One-Line Execution:** Instant setup on any fresh Windows installation.
-
----
-
-<a name="türkçe"></a>
-## 🇹🇷 Türkçe Tanıtım
-
-WinOptimizer artık sadece bir temizleyici değil, **Eksiksiz bir Yazılım Ansiklopedisi.**
-
-### ✨ Öne Çıkan Özellikler (v3.2.0)
-- **⚡ FastMenu Navigasyon:** Menüler arasında `Enter`a basmadan tuşa bastığınız anda anlık geçiş yapın.
-- **📚 Dev Yazılım Kütüphanesi:** 10 ana kategoride toplanmış 100'den fazla profesyonel araç.
-- **⚙️ Modüler Optimizasyon:** 15+ farklı optimizasyon seçeneği ile tam denetim (SysMain, Oyun Modu, Bloatware vb.).
-- **📖 Bilgi Bankası:** Fare gecikmesi, ping ve sistem temizliği hakkında uzman rehberi.
-- **📅 Zamanlanmış Bakim:** Her Pazar saat 03:00'da otomatik bakım yapması için görev ekleme.
-- **🔍 Gelişmiş Arama:** Listede olmayan her şeyi `winget` üzerinden saniyeler içinde bulun ve kurun.
-
----
-
-## ⚡ Quick Start (The One-Liner)
-
-PowerShell'i yönetici olarak açın ve şu komutu yapıştırın:
+1. **Powershell (Yönetici)** olarak açın.
+2. Script dizinine gidin.
+3. Aşağıdaki komutla çalıştırın:
 
 ```powershell
-irm https://raw.githubusercontent.com/Barracuda1337/WinOptimizer/main/WinOptimizer.ps1 | iex
+Set-ExecutionPolicy Bypass -Scope Process -Force
+.\WinOptimizer.ps1
 ```
 
 ---
 
-## 🤝 Contributing
-Contributions are welcome! If you want to add new software to the encyclopedia, check `WinOptimizer.ps1`.
+## 📋 Optimizasyon Modülleri
 
-<div align="center">
+| Modül | Açıklama | Fayda |
+| :--- | :--- | :--- |
+| **Gelişmiş Ayarlar** | Telemetry, WUDO, SSD TRIM | Gizlilik & İnternet Hızı |
+| **Derin Depolama** | Hiberfil, Reserved Storage | SSD Yer Tasarrufu |
+| **Oyun Modu** | HAGS, Game Mode | Maksimum FPS |
+| **Ağ Optimizasyonu** | Cloudflare DNS, Wi-Fi Roaming | Kararlı Ping |
+| **Görsel Efektler** | Win Performance Mode | Düşük Gecikme |
 
-Made with 🛠️ by [Barracuda1337](https://github.com/Barracuda1337)
+---
 
-</div>
+## 📸 Raporlama Sistemi
+
+İşlem bittiğinde `[V]` tuşuna basarak veya `[A]` (Hepsini Uygula) seçeneğinden sonra otomatik olarak açılan **Premium HTML Raporu** ile sisteminizdeki RAM ve Disk kazancını, yapılan tüm işlemlerin detaylarını görsel bir panel üzerinden takip edebilirsiniz.
+
+---
+
+## ⚠️ Uyarı ve Güvenlik
+
+- Bu araç **Administrator** yetkisi gerektirir.
+- İşlem öncesi otomatik olarak **Sistem Geri Yükleme Noktası** oluşturma seçeneği sunar.
+- Kod tamamen şeffaftır ve GitHub üzerinden incelenebilir.
+
+---
+
+**Maintainer:** Barracuda1337 | **Versiyon:** 3.2.2
