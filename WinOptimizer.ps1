@@ -126,13 +126,39 @@ function Write-Banner {
 # ============================================================
 
 function New-OptimizeRestorePoint {
+    <#
+    .SYNOPSIS
+        Sistem geri yükleme noktası oluşturur ve hata durumunda nedenini analiz eder.
+    #>
     Write-Section "SİSTEM GERİ YÜKLEME NOKTASI"
     try {
-        Enable-ComputerRestore -Drive "C:\" -ErrorAction Stop
-        Checkpoint-Computer -Description "WinOptimizer v$($script:Version)" -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
-        Write-Status "Geri yükleme noktası oluşturuldu" "OK"
+        Checkpoint-Computer -Description "WinOptimizer Expert v$($script:Version)" -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
+        Write-Status "Geri yükleme noktası başarıyla oluşturuldu." "OK"
         Add-Result "Sistem" "Geri Yükleme Noktası" $true
-    } catch { Write-Status "Hata: $($_.Exception.Message)" "WARN" }
+        return $true
+    } catch {
+        Write-Status "Geri yükleme noktası oluşturulamadı!" "FAIL"
+        
+        # Derin Analiz
+        Write-Host "`n  [!] Hata Analizi Yapılıyor..." -ForegroundColor Yellow
+        
+        # 1. Sistem Koruması Kontrolü
+        $isProtected = (Get-CimInstance -Namespace root/default -ClassName SystemRestoreConfig | Where-Object { $_.Drive -eq "C:\" })
+        if ($null -eq $isProtected) {
+            Write-Host "  -> C: sürücüsü için Sistem Koruması KAPALI görünüyor." -ForegroundColor Red
+        }
+
+        # 2. VSS Servis Kontrolü
+        $vss = Get-Service VSS -ErrorAction SilentlyContinue
+        if ($vss.StartType -eq "Disabled") {
+            Write-Host "  -> VSS (Volume Shadow Copy) servisi DEVRE DIŞI bırakılmış." -ForegroundColor Red
+        }
+
+        Write-Host "  -> Hata Detayı: $($_.Exception.Message)" -ForegroundColor Gray
+
+        Add-Result "Sistem" "Geri Yükleme Noktası" $false "Hata: $($_.Exception.Message)"
+        return $false
+    }
 }
 
 function Disable-StartupPrograms {
@@ -197,11 +223,59 @@ function Clear-TempFiles {
 }
 
 function Set-OptimalDns {
-    Write-Section "DNS"
-    $adapters = Get-NetAdapter | Where-Object { $_.Status -eq "Up" }
-    foreach ($a in $adapters) { Set-DnsClientServerAddress -InterfaceAlias $a.Name -ServerAddresses @("1.1.1.1", "8.8.8.8") -ErrorAction SilentlyContinue }
-    Write-Status "Cloudflare DNS (1.1.1.1) atandı" "OK"
-    Add-Result "Ağ" "DNS Optimizasyonu" $true
+    <#
+    .SYNOPSIS
+        DNS sunucularını çözümleme hızı (Latency) açısından test eder ve en hızlısını atar.
+    #>
+    Write-Section "AKILLI DNS OPTİMİZASYONU"
+    
+    $dnsServers = @(
+        @{ Name = "Cloudflare"; IP = "1.1.1.1"; Alt = "1.0.0.1" },
+        @{ Name = "Google";     IP = "8.8.8.8"; Alt = "8.8.4.4" },
+        @{ Name = "Quad9";      IP = "9.9.9.9"; Alt = "149.112.112.112" }
+    )
+
+    $results = @()
+    Write-Host "  DNS sunucuları test ediliyor (Resolve-DnsName)..." -ForegroundColor Gray
+
+    foreach ($server in $dnsServers) {
+        $totalTime = 0
+        $successCount = 0
+        
+        # 3 adet test ölçümü yap (ortalama için)
+        for ($i=1; $i -le 3; $i++) {
+            $test = $null
+            $measure = Measure-Command { 
+                $test = Resolve-DnsName -Name "www.google.com" -Server $server.IP -Count 1 -QuickLookup -ErrorAction SilentlyContinue 
+            }
+            if ($test) {
+                $totalTime += $measure.TotalMilliseconds
+                $successCount++
+            }
+        }
+
+        if ($successCount -gt 0) {
+            $avgTime = [math]::Round($totalTime / $successCount, 2)
+            $results += [PSCustomObject]@{ Name = $server.Name; IP = $server.IP; Alt = $server.Alt; Latency = $avgTime }
+            Write-Host "  -> $($server.Name): $avgTime ms" -ForegroundColor Cyan
+        }
+    }
+
+    $bestDns = $results | Sort-Object Latency | Select-Object -First 1
+
+    if ($bestDns) {
+        Write-Status "En hızlı sunucu seçildi: $($bestDns.Name) ($($bestDns.Latency) ms)" "OK"
+        $adapters = Get-NetAdapter | Where-Object { $_.Status -eq "Up" }
+        foreach ($a in $adapters) { 
+            Set-DnsClientServerAddress -InterfaceAlias $a.Name -ServerAddresses @($bestDns.IP, $bestDns.Alt) -ErrorAction SilentlyContinue 
+        }
+        Add-Result "Ağ" "DNS Optimizasyonu" $true "En hızlı seçilen: $($bestDns.Name)"
+    } else {
+        Write-Status "DNS testleri başarısız oldu, varsayılan Cloudflare atanıyor." "WARN"
+        $adapters = Get-NetAdapter | Where-Object { $_.Status -eq "Up" }
+        foreach ($a in $adapters) { Set-DnsClientServerAddress -InterfaceAlias $a.Name -ServerAddresses @("1.1.1.1", "1.0.0.1") -ErrorAction SilentlyContinue }
+        Add-Result "Ağ" "DNS Optimizasyonu" $true "Varsayılan: Cloudflare"
+    }
 }
 
 function Remove-Bloatware {
@@ -302,6 +376,55 @@ function Register-WeeklyTask {
     Add-Result "Görev" "Haftalık Bakım" $true
 }
 
+function Invoke-SystemHealthCheck {
+    <#
+    .SYNOPSIS
+        Windows bütünlüğünü DISM ve SFC ile kontrol eder.
+    .DESCRIPTION
+        Sisteme zarar vermeden dosya bütünlüğünü analiz eder, hata bulunursa onarım seçeneği sunar.
+    #>
+    Write-Section "SİSTEM SAĞLIK DENETİMİ"
+    Write-Status "DISM kontrolü başlatılıyor (CheckHealth)..."
+    
+    $dismResult = DISM.exe /Online /Cleanup-Image /CheckHealth 2>&1
+    $corruptionFound = $false
+
+    if ($dismResult -match "No component store corruption detected") {
+        Write-Status "DISM: Bileşen deposu sağlıklı." "OK"
+    } else {
+        Write-Status "DISM: Bileşen deposunda bozukluk tespit edildi!" "FAIL"
+        $corruptionFound = $true
+    }
+
+    Write-Status "SFC doğrulaması başlatılıyor (VerifyOnly)..."
+    $sfcResult = sfc.exe /verifyonly 2>&1
+    
+    if ($sfcResult -match "Windows Resource Protection did not find any integrity violations") {
+        Write-Status "SFC: Sistem dosyaları bütünlüğü tam." "OK"
+    } else {
+        Write-Status "SFC: Bütünlük ihlalleri tespit edildi!" "FAIL"
+        $corruptionFound = $true
+    }
+
+    if ($corruptionFound) {
+        Write-Host "`n  [!] Hatalar tespit edildi. Onarım işlemini başlatmak ister misiniz?" -ForegroundColor Yellow
+        Write-Host "  (Bu işlem internet bağlantısı gerektirir ve 5-15 dakika sürebilir.)" -ForegroundColor Gray
+        Write-Host "  [Y] Evet, Onar | [N] Hayır, Atla" -ForegroundColor White
+        Write-Host "`n  Seçiminiz: " -NoNewline
+        
+        $repairInput = Get-Key
+        if ($repairInput -eq "Y") {
+            Write-Status "Onarım başlatılıyor... Lütfen bekleyin." "WARN"
+            DISM.exe /Online /Cleanup-Image /RestoreHealth
+            sfc.exe /scannow
+            Write-Status "Onarım işlemi tamamlandı. Sistemin yeniden başlatılması önerilir." "OK"
+            Add-Result "Sağlık" "Sistem Onarımı" $true "DISM ve SFC onarımı uygulandı."
+        }
+    } else {
+        Add-Result "Sağlık" "Sistem Denetimi" $true "Bozukluk tespit edilmedi."
+    }
+}
+
 function Export-HtmlReport {
     param($Before, $After)
     Write-Host "`n  [!] Rapor hazırlanıyor ve açılıyor..." -ForegroundColor Cyan
@@ -366,7 +489,17 @@ function Export-HtmlReport {
 
 function Invoke-AllModules {
     $script:BeforeSnap = Get-SystemSnapshot
-    New-OptimizeRestorePoint; Clear-TempFiles; Set-HighPerformancePlan; Enable-GameMode; Set-OptimalDns; Repair-MouseDrivers; Disable-StartupPrograms; Optimize-VisualEffects; Remove-Bloatware; Disable-SysMain; Optimize-WiFi; Optimize-DeepStorage; Optimize-AdvancedTweaks
+    
+    $rpStatus = New-OptimizeRestorePoint
+    if (-not $rpStatus) {
+        Write-Host "`n  [!] Geri yükleme noktası OLUŞTURULAMADI." -ForegroundColor Red
+        Write-Host "  Kritik sistem değişikliklerine bu güvenlik katmanı olmadan devam etmek RISKLI." -ForegroundColor Yellow
+        Write-Host "  Devam etmek istiyor musunuz? [Y/N]" -ForegroundColor White
+        $choice = Get-Key
+        if ($choice -ne "Y") { return }
+    }
+
+    Clear-TempFiles; Set-HighPerformancePlan; Enable-GameMode; Set-OptimalDns; Repair-MouseDrivers; Disable-StartupPrograms; Optimize-VisualEffects; Remove-Bloatware; Disable-SysMain; Optimize-WiFi; Optimize-DeepStorage; Optimize-AdvancedTweaks
     $script:AfterSnap = Get-SystemSnapshot
     Export-HtmlReport -Before $script:BeforeSnap -After $script:AfterSnap
 }
@@ -443,13 +576,17 @@ while ($true) {
     Write-Banner
     Write-Host "  [1] OPTİMİZASYON MENÜSÜ" -ForegroundColor Cyan
     Write-Host "  [2] YAZILIM YÖNETİCİSİ" -ForegroundColor Green
-    Write-Host "  [3] SİSTEMİ GÜNCELLE" -ForegroundColor Yellow
+    Write-Host "  [3] HAFTALIK GÖREV" -ForegroundColor Yellow
+    Write-Host "  [4] SİSTEM SAĞLIK DENETİMİ" -ForegroundColor Blue
+    Write-Host "  [5] SİSTEMİ GÜNCELLE" -ForegroundColor DarkCyan
     Write-Host "  [Q] ÇIKIŞ" -ForegroundColor DarkGray
     Write-Host "`n  Seçiminiz: " -NoNewline
     $startChoice = Get-Key
 
     if     ($startChoice -eq "1") { Show-OptimizationMenu }
     elseif ($startChoice -eq "2") { Show-AppStore }
-    elseif ($startChoice -eq "3") { winget upgrade --all; Read-Host }
+    elseif ($startChoice -eq "3") { Register-WeeklyTask; Read-Host }
+    elseif ($startChoice -eq "4") { Invoke-SystemHealthCheck; Read-Host }
+    elseif ($startChoice -eq "5") { winget upgrade --all; Read-Host }
     elseif ($startChoice -eq "Q") { exit }
 }
