@@ -259,7 +259,7 @@ function Export-HtmlReport {
     <title>WinOptimizer Premium Report</title>
     <style>
         :root { --bg: #030712; --card: #111827; --accent: #3b82f6; --green: #10b981; --red: #ef4444; --text: #f3f4f6; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', system-ui; padding: 40px; margin: 0; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; padding: 40px; margin: 0; }
         .container { max-width: 1000px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #374151; padding-bottom: 20px; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
@@ -282,10 +282,10 @@ function Export-HtmlReport {
             <div style="text-align:right; color:#9ca3af">$(Get-Date -Format 'F')</div>
         </div>
         <div class="grid">
-            <div class="card"><div class="val">$okCount</div><div class="lbl">İşlem Tamam</div></div>
-            <div class="card"><div class="val" style="color:var(--green)">+$diskGain GB</div><div class="lbl">Disk Kazancı</div></div>
-            <div class="card"><div class="val" style="color:var(--green)">+$ramGain GB</div><div class="lbl">RAM Özgürlüğü</div></div>
-            <div class="card"><div class="val">${duration}s</div><div class="lbl">Süre</div></div>
+            <div class="card"><div class="val">$okCount</div><div class="lbl">&Idot;ÅŸlem Tamam</div></div>
+            <div class="card"><div class="val" style="color:var(--green)">+$diskGain GB</div><div class="lbl">Disk KazancÄ±</div></div>
+            <div class="card"><div class="val" style="color:var(--green)">+$ramGain GB</div><div class="lbl">RAM &Ouml;zg&uuml;rl&uuml;gu</div></div>
+            <div class="card"><div class="val">${duration}s</div><div class="lbl">S&uuml;re</div></div>
         </div>
         <table>
             <thead><tr><th>Kategori</th><th>Girdi</th><th>Durum</th><th>Detay</th></tr></thead>
