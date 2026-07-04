@@ -404,6 +404,7 @@ function Show-OptimizationMenu {
         Write-Host "  [W] Wi-Fi Optimizasyonu" -ForegroundColor White
         Write-Host "  [T] Haftalık Bakım Görevi Ekle" -ForegroundColor White
         Write-Host "  [R] Haftalık Görevi Kaldır" -ForegroundColor DarkGray
+        Write-Host "  [V] Raporu Görüntüle (HTML)" -ForegroundColor Yellow
         Write-Host "  [A] Hepsini Uygula (Önerilir)" -ForegroundColor Cyan
         Write-Host "  [B] Geri dön" -ForegroundColor DarkGray
         Write-Host ""
@@ -425,6 +426,7 @@ function Show-OptimizationMenu {
             "W" { Optimize-WiFi }
             "T" { Register-WeeklyTask }
             "R" { Register-WeeklyTask -Remove }
+            "V" { Export-HtmlReport -Before $null -After $null }
             "A" { Invoke-AllModules; break }
             "B" { break }
         }
