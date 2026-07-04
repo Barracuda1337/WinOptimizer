@@ -38,7 +38,7 @@ $script:StartTime  = Get-Date
 
 # Default config
 $script:Config = if (Test-Path $script:ConfigPath) {
-    try { Get-Content $script:ConfigPath -Raw | ConvertFrom-Json } catch { $null }
+    try { Get-Content $script:ConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json } catch { $null }
 } else { $null }
 
 if ($null -eq $script:Config) {
@@ -108,12 +108,16 @@ function Add-Result([string]$Category, [string]$Action, [bool]$Success, [string]
 }
 
 function Get-SystemSnapshot {
-    # Statik bilgileri önbellekten, değişken olanları (FreeRAM) anlık al
-    $os  = $script:CachedOS
-    $freeMem = [math]::Round((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB, 2)
+    <#
+    .SYNOPSIS
+        Anlık sistem kaynağı durumunu ölçer.
+    .NOTES
+        FreeRAM anlık veri gerektirir — CachedOS (başlangıç anı) kullanılamaz.
+        FreeDisk anlık hesaplanır, CIM gerektirmez.
+    #>
     return [PSCustomObject]@{
         Time        = Get-Date
-        FreeRAM_GB  = $freeMem
+        FreeRAM_GB  = [math]::Round((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB, 2)
         FreeDisk_GB = [math]::Round((Get-PSDrive C).Free / 1GB, 2)
     }
 }
@@ -170,14 +174,46 @@ function New-OptimizeRestorePoint {
 function Disable-StartupPrograms {
     Write-Section "BAŞLANGIÇ PROGRAMLARI"
     $toDisable = $script:Config.startup.safe_to_disable
-    $count = 0
+    $attempted = 0
+    $removed   = 0
+    $notFound  = 0
+
+    $hkcuPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run"
+    $hklmPath = "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run"
+
     foreach ($appName in $toDisable) {
-        Remove-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Run" -Name $appName -ErrorAction SilentlyContinue
-        Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name $appName -ErrorAction SilentlyContinue
-        $count++
+        $attempted++
+        $foundAny = $false
+
+        # HKCU kontrolü ve silme
+        if (Test-Path "$hkcuPath\$appName" -ErrorAction SilentlyContinue) {
+            $foundAny = $true
+        } elseif ((Get-ItemProperty -Path $hkcuPath -Name $appName -ErrorAction SilentlyContinue) -ne $null) {
+            $foundAny = $true
+        }
+        Remove-ItemProperty -Path $hkcuPath -Name $appName -ErrorAction SilentlyContinue
+
+        # HKLM kontrolü ve silme
+        if ((Get-ItemProperty -Path $hklmPath -Name $appName -ErrorAction SilentlyContinue) -ne $null) {
+            $foundAny = $true
+        }
+        Remove-ItemProperty -Path $hklmPath -Name $appName -ErrorAction SilentlyContinue
+
+        # Silme doğrulaması: Key hâlâ varsa başarısız sayılır
+        $stillExists = ((Get-ItemProperty -Path $hkcuPath -Name $appName -ErrorAction SilentlyContinue) -ne $null) -or
+                       ((Get-ItemProperty -Path $hklmPath -Name $appName -ErrorAction SilentlyContinue) -ne $null)
+
+        if ($stillExists) {
+            # Hâlâ mevcut — silemedi
+        } elseif ($foundAny) {
+            $removed++
+        } else {
+            $notFound++
+        }
     }
-    Write-Status "$count potansiyel öğe kontrol edildi" "OK"
-    Add-Result "Sistem" "Başlangıç Programları" $true
+
+    Write-Status "Denenen: $attempted | Silinen: $removed | Kayıt Bulunamadı: $notFound" "OK"
+    Add-Result "Sistem" "Başlangıç Programları" $true "Denenen: $attempted, Silinen: $removed, Bulunamadı: $notFound"
 }
 
 function Repair-MouseDrivers {
@@ -205,8 +241,8 @@ function Set-HighPerformancePlan {
         $currentPlanMsg = powercfg -getactivescheme
         if ($currentPlanMsg -match "GUID: ([\w-]+)") {
             $oldGuid = $matches[1]
-            $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw | ConvertFrom-Json } else { @{} }
-            $backups | Add-Member -Name "PowerPlan" -Value $oldGuid -Force
+            $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw -Encoding UTF8 | ConvertFrom-Json } else { [PSCustomObject]@{} }
+            $backups | Add-Member -MemberType NoteProperty -Name "PowerPlan" -Value $oldGuid -Force
             $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
         }
 
@@ -226,7 +262,7 @@ function Enable-GameMode {
     )
     
     # Somut Rollback: Mevcut değerleri yedekle
-    $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw | ConvertFrom-Json } else { [PSCustomObject]@{} }
+    $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw -Encoding UTF8 | ConvertFrom-Json } else { [PSCustomObject]@{} }
     if (-not $backups.Registry) { $backups | Add-Member -Name "Registry" -Value (New-Object PSObject) }
 
     foreach ($path in $regPaths) { 
@@ -236,8 +272,8 @@ function Enable-GameMode {
     $oldHwSch = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name "HwSchMode" -ErrorAction SilentlyContinue).HwSchMode
     $oldGameBar = (Get-ItemProperty -Path "HKCU:\Software\Microsoft\GameBar" -Name "AllowAutoGameMode" -ErrorAction SilentlyContinue).AllowAutoGameMode
     
-    if ($null -ne $oldHwSch) { $backups.Registry | Add-Member -Name "HwSchMode" -Value $oldHwSch -Force }
-    if ($null -ne $oldGameBar) { $backups.Registry | Add-Member -Name "AllowAutoGameMode" -Value $oldGameBar -Force }
+    if ($null -ne $oldHwSch) { $backups.Registry | Add-Member -MemberType NoteProperty -Name "HwSchMode" -Value $oldHwSch -Force }
+    if ($null -ne $oldGameBar) { $backups.Registry | Add-Member -MemberType NoteProperty -Name "AllowAutoGameMode" -Value $oldGameBar -Force }
     $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
 
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name "HwSchMode" -Value 2 -ErrorAction SilentlyContinue
@@ -315,12 +351,12 @@ function Set-OptimalDns {
         $adapters = Get-NetAdapter | Where-Object { $_.Status -eq "Up" }
         
         # Somut Rollback: Mevcut DNS ayarlarını yedekle
-        $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw | ConvertFrom-Json } else { [PSCustomObject]@{} }
+        $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw -Encoding UTF8 | ConvertFrom-Json } else { [PSCustomObject]@{} }
         if (-not $backups.DNS) { $backups | Add-Member -Name "DNS" -Value (New-Object PSObject) }
         
         foreach ($a in $adapters) { 
             $currentDns = (Get-DnsClientServerAddress -InterfaceAlias $a.Name).ServerAddresses
-            $backups.DNS | Add-Member -Name $a.Name -Value $currentDns -Force
+            $backups.DNS | Add-Member -MemberType NoteProperty -Name $a.Name -Value $currentDns -Force
             Set-DnsClientServerAddress -InterfaceAlias $a.Name -ServerAddresses @($bestDns.IP, $bestDns.Alt) -ErrorAction SilentlyContinue 
         }
         $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
@@ -357,9 +393,9 @@ function Optimize-VisualEffects {
     # Somut Rollback: Eski değeri yedekle
     $oldVal = (Get-ItemProperty -Path $path -Name "VisualFXSetting" -ErrorAction SilentlyContinue).VisualFXSetting
     if ($null -ne $oldVal) {
-        $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw | ConvertFrom-Json } else { [PSCustomObject]@{} }
-        if (-not $backups.Registry) { $backups | Add-Member -Name "Registry" -Value (New-Object PSObject) }
-        $backups.Registry | Add-Member -Name "VisualFXSetting" -Value $oldVal -Force
+        $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw -Encoding UTF8 | ConvertFrom-Json } else { [PSCustomObject]@{} }
+        if (-not $backups.Registry) { $backups | Add-Member -MemberType NoteProperty -Name "Registry" -Value (New-Object PSObject) }
+        $backups.Registry | Add-Member -MemberType NoteProperty -Name "VisualFXSetting" -Value $oldVal -Force
         $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
     }
 
@@ -370,11 +406,28 @@ function Optimize-VisualEffects {
 
 function Optimize-DeepStorage {
     Write-Section "DERİN DEPOLAMA"
+
+    # Rollback: Mevcut hibernate ve güç planı durumunu yedekle
+    $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw -Encoding UTF8 | ConvertFrom-Json } else { [PSCustomObject]@{} }
+    if (-not $backups.DeepStorage) { $backups | Add-Member -MemberType NoteProperty -Name "DeepStorage" -Value (New-Object PSObject) }
+
+    # Hibernate durumunu oku (powercfg /a çıktısı dil bağımsız hibernateflags kontrolü yerine doğrudan dosya varlığına bakılır)
+    $hibernateFile = Join-Path $env:SystemRoot "hiberfil.sys"
+    $hibernateEnabled = Test-Path $hibernateFile
+    $backups.DeepStorage | Add-Member -MemberType NoteProperty -Name "HibernateEnabled" -Value $hibernateEnabled -Force
+
+    # Aktif güç planını oku
+    $activePlan = powercfg -getactivescheme
+    if ($activePlan -match "GUID: ([\w-]+)") {
+        $backups.DeepStorage | Add-Member -MemberType NoteProperty -Name "PowerPlanGuid" -Value $matches[1] -Force
+    }
+    $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
+
     powercfg /h off 2>$null
     DISM.exe /Online /Set-ReservedStorageState /State:Disabled /Quiet 2>$null
     powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 2>$null
     powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61 2>$null
-    Write-Status "GB'larca yer açıldı" "OK"
+    Write-Status "GB'larca yer açıldı (Eski durum yedeklendi)" "OK"
     Add-Result "Disk" "Derin Depolama" $true
 }
 
@@ -385,9 +438,9 @@ function Disable-SysMain {
         # Somut Rollback: Servis başlangıç türünü yedekle
         $svc = Get-Service SysMain -ErrorAction SilentlyContinue
         if ($svc) {
-            $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw | ConvertFrom-Json } else { [PSCustomObject]@{} }
-            if (-not $backups.Services) { $backups | Add-Member -Name "Services" -Value (New-Object PSObject) }
-            $backups.Services | Add-Member -Name "SysMain" -Value $svc.StartType.ToString() -Force
+            $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw -Encoding UTF8 | ConvertFrom-Json } else { [PSCustomObject]@{} }
+            if ($null -eq $backups.Services) { $backups | Add-Member -MemberType NoteProperty -Name "Services" -Value (New-Object PSObject) }
+            $backups.Services | Add-Member -MemberType NoteProperty -Name "SysMain" -Value $svc.StartType.ToString() -Force
             $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
         }
 
@@ -403,16 +456,66 @@ function Disable-SysMain {
 
 function Optimize-WiFi {
     Write-Section "WI-FI"
+
+    # Rollback: Mevcut RoamAggressiveness değerini adaptör bazlı yedekle
+    $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw -Encoding UTF8 | ConvertFrom-Json } else { [PSCustomObject]@{} }
+    if (-not $backups.WiFi) { $backups | Add-Member -MemberType NoteProperty -Name "WiFi" -Value (New-Object PSObject) }
+
     Get-NetAdapter | Where-Object { $_.MediaType -eq "Native 802.11" } | ForEach-Object {
+        $prop = Get-NetAdapterAdvancedProperty -Name $_.Name -RegistryKeyword "RoamAggressiveness" -ErrorAction SilentlyContinue
+        if ($prop) {
+            $backups.WiFi | Add-Member -MemberType NoteProperty -Name $_.Name -Value $prop.RegistryValue -Force
+        }
         Set-NetAdapterAdvancedProperty -Name $_.Name -RegistryKeyword "RoamAggressiveness" -RegistryValue 1 -ErrorAction SilentlyContinue
     }
-    Write-Status "Wi-Fi optimize edildi" "OK"
+    $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
+
+    Write-Status "Wi-Fi optimize edildi (Eski ayarlar yedeklendi)" "OK"
     Add-Result "Ağ" "Wi-Fi Optimizasyonu" $true
 }
 
 function Optimize-AdvancedTweaks {
     Write-Section "GELİŞMİŞ AYARLAR & GİZLİLİK"
+
+    # Rollback: Tüm değiştirilen değerleri değiştirmeden önce oku ve yedekle
+    $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw -Encoding UTF8 | ConvertFrom-Json } else { [PSCustomObject]@{} }
+    if (-not $backups.AdvancedTweaks) { $backups | Add-Member -MemberType NoteProperty -Name "AdvancedTweaks" -Value (New-Object PSObject) }
+    $at = $backups.AdvancedTweaks
+
+    # Telemetry eski değeri
+    $oldTelemetry = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -ErrorAction SilentlyContinue).AllowTelemetry
+    $at | Add-Member -MemberType NoteProperty -Name "AllowTelemetry" -Value $oldTelemetry -Force
+
+    # WUDO eski değeri
+    $oldWudo = (Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Name "DODownloadMode" -ErrorAction SilentlyContinue).DODownloadMode
+    $at | Add-Member -MemberType NoteProperty -Name "DODownloadMode" -Value $oldWudo -Force
+
+    # SearchOrderConfig eski değeri (varsayılan: 1)
+    $oldSearch = (Get-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\DriverSearching" -Name "SearchOrderConfig" -ErrorAction SilentlyContinue).SearchOrderConfig
+    $at | Add-Member -MemberType NoteProperty -Name "SearchOrderConfig" -Value $oldSearch -Force
+
+    # Saydamlık eski değeri
+    $thPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
+    $oldTransparency = (Get-ItemProperty -Path $thPath -Name "EnableTransparency" -ErrorAction SilentlyContinue).EnableTransparency
+    $at | Add-Member -MemberType NoteProperty -Name "EnableTransparency" -Value $oldTransparency -Force
+
+    # Arka Plan eski değeri
+    $bgPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications"
+    $oldBg = (Get-ItemProperty -Path $bgPath -Name "GlobalUserDisabled" -ErrorAction SilentlyContinue).GlobalUserDisabled
+    $at | Add-Member -MemberType NoteProperty -Name "GlobalUserDisabled" -Value $oldBg -Force
+
+    # WaitToKillServiceTimeout eski değeri (Windows varsayılanı: "5000")
+    $oldKillTimeout = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name "WaitToKillServiceTimeout" -ErrorAction SilentlyContinue).WaitToKillServiceTimeout
+    $at | Add-Member -MemberType NoteProperty -Name "WaitToKillServiceTimeout" -Value $oldKillTimeout -Force
+
+    # DiagTrack servisi eski başlangıç türü
+    $diagSvc = Get-Service DiagTrack -ErrorAction SilentlyContinue
+    $at | Add-Member -MemberType NoteProperty -Name "DiagTrackStartType" -Value ($diagSvc.StartType.ToString()) -Force
+
+    $backups | ConvertTo-Json -Depth 5 | Out-File $script:BackupPath -Encoding UTF8
     
+    # --- Değişiklikleri Uygula ---
+
     # Telemetry Kapatma
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -ErrorAction SilentlyContinue
     Stop-Service DiagTrack -Force -ErrorAction SilentlyContinue
@@ -429,11 +532,8 @@ function Optimize-AdvancedTweaks {
     Write-Status "SSD TRIM doğrulandı ve Aygıt Taraması optimize edildi" "OK"
     
     # Arka Plan Uygulamaları & Saydamlık
-    $bgPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications"
-    $thPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
     if (-not (Test-Path $bgPath)) { New-Item -Path $bgPath -Force | Out-Null }
     if (-not (Test-Path $thPath)) { New-Item -Path $thPath -Force | Out-Null }
-    
     Set-ItemProperty -Path $bgPath -Name "GlobalUserDisabled" -Value 1 -ErrorAction SilentlyContinue
     Set-ItemProperty -Path $thPath -Name "EnableTransparency" -Value 0 -ErrorAction SilentlyContinue
     Write-Status "Arka Plan Uygulamaları ve Saydamlık efektleri kapatıldı" "OK"
@@ -463,27 +563,34 @@ function Invoke-SystemHealthCheck {
         Windows bütünlüğünü DISM ve SFC ile kontrol eder.
     .DESCRIPTION
         Sisteme zarar vermeden dosya bütünlüğünü analiz eder, hata bulunursa onarım seçeneği sunar.
+        Exit code kullanır; dil (Türkçe/İngilizce) bağımsız çalışır.
     #>
     Write-Section "SİSTEM SAĞLIK DENETİMİ"
-    Write-Status "DISM kontrolü başlatılıyor (CheckHealth)..."
-    
-    $dismResult = DISM.exe /Online /Cleanup-Image /CheckHealth 2>&1
     $corruptionFound = $false
 
-    if ($dismResult -match "No component store corruption detected") {
+    # --- DISM Kontrolü ---
+    # Exit Code: 0 = Sağlıklı, 1 = Bozukluk tespit edildi, Diğer = Erişim hatası
+    Write-Status "DISM kontrolü başlatılıyor (CheckHealth)..."
+    $dismResult = DISM.exe /Online /Cleanup-Image /CheckHealth 2>&1
+    Write-Log "DISM CheckHealth ExitCode: $LASTEXITCODE"
+
+    if ($LASTEXITCODE -eq 0) {
         Write-Status "DISM: Bileşen deposu sağlıklı." "OK"
     } else {
-        Write-Status "DISM: Bileşen deposunda bozukluk tespit edildi!" "FAIL"
+        Write-Status "DISM: Bileşen deposunda sorun tespit edildi! (ExitCode: $LASTEXITCODE)" "FAIL"
         $corruptionFound = $true
     }
 
+    # --- SFC Kontrolü ---
+    # Exit Code: 0 = Sorun yok, 1 = Bozukluk bulundu ve onarıldı, 2 = Bozukluk bulundu ama onarılamadı
     Write-Status "SFC doğrulaması başlatılıyor (VerifyOnly)..."
     $sfcResult = sfc.exe /verifyonly 2>&1
-    
-    if ($sfcResult -match "Windows Resource Protection did not find any integrity violations") {
+    Write-Log "SFC VerifyOnly ExitCode: $LASTEXITCODE"
+
+    if ($LASTEXITCODE -eq 0) {
         Write-Status "SFC: Sistem dosyaları bütünlüğü tam." "OK"
     } else {
-        Write-Status "SFC: Bütünlük ihlalleri tespit edildi!" "FAIL"
+        Write-Status "SFC: Bütünlük sorunu tespit edildi! (ExitCode: $LASTEXITCODE)" "FAIL"
         $corruptionFound = $true
     }
 
@@ -563,7 +670,7 @@ function Export-HtmlReport {
 </body>
 </html>
 "@
-    [System.IO.File]::WriteAllText($script:ReportPath, $html, [System.Text.Encoding]::UTF8)
+    $html | Set-Content -Path $script:ReportPath -Encoding UTF8
     $shell = New-Object -ComObject Shell.Application
     $shell.Open($script:ReportPath)
 }
@@ -575,12 +682,20 @@ function Invoke-Rollback {
     #>
     Write-Section "AYARLARI GERİ YÜKLEME (UNDO)"
     if (-not (Test-Path $script:BackupPath)) {
-        Write-Status "Yedek dosyası bulunamadı." "WARN"
+        Write-Status "Yedek dosyası bulunamadı. Henüz hiçbir değişiklik yedeklenmemiş." "WARN"
         return
     }
 
-    $backups = Get-Content $script:BackupPath -Raw | ConvertFrom-Json
-    
+    # Blocker 4: JSON parse try/catch ile güvenli hale getirildi
+    try {
+        $backups = Get-Content $script:BackupPath -Raw -ErrorAction Stop | ConvertFrom-Json -ErrorAction Stop
+    } catch {
+        Write-Status "Yedek dosyası okunamadı veya bozuk! ($($_.Exception.Message))" "FAIL"
+        Write-Host "  -> Dosya: $script:BackupPath" -ForegroundColor Gray
+        Write-Host "  -> Çözüm: Dosyayı silerek yeni bir optimizasyon çalıştırın." -ForegroundColor Yellow
+        return
+    }
+
     # 1. Güç Planı Geri Yükleme
     if ($backups.PowerPlan) {
         Write-Host "  -> Yedeklenen Güç Planı bulundu ($($backups.PowerPlan))" -ForegroundColor Cyan
@@ -600,23 +715,64 @@ function Invoke-Rollback {
         }
     }
 
-    # 3. Servis Geri Yükleme
+    # 3. Servis (SysMain) Geri Yükleme
     if ($backups.Services.SysMain) {
         Write-Host "  -> Yedeklenen SysMain durumu bulundu ($($backups.Services.SysMain))" -ForegroundColor Cyan
         Set-Service SysMain -StartupType $backups.Services.SysMain -ErrorAction SilentlyContinue
         Write-Status "SysMain servisi eski durumuna getirildi." "OK"
     }
 
-    # 4. Registry Geri Yükleme
+    # 4. Registry Geri Yükleme (GameMode + VisualEffects)
     if ($backups.Registry) {
         Write-Host "  -> Yedeklenen Registry ayarları bulundu." -ForegroundColor Cyan
-        if ($backups.Registry.HwSchMode -ne $null) {
+        if ($null -ne $backups.Registry.HwSchMode) {
             Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name "HwSchMode" -Value $backups.Registry.HwSchMode -ErrorAction SilentlyContinue
         }
-        if ($backups.Registry.VisualFXSetting -ne $null) {
+        if ($null -ne $backups.Registry.VisualFXSetting) {
             Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value $backups.Registry.VisualFXSetting -ErrorAction SilentlyContinue
         }
         Write-Status "Registry ayarları geri yüklendi." "OK"
+    }
+
+    # 5. DeepStorage Geri Yükleme (Hibernate + Güç Planı)
+    if ($backups.DeepStorage) {
+        Write-Host "  -> Yedeklenen Derin Depolama ayarları bulundu." -ForegroundColor Cyan
+        if ($backups.DeepStorage.HibernateEnabled -eq $true) {
+            powercfg /h on 2>$null
+            Write-Status "Hibernate yeniden etkinleştirildi." "OK"
+        }
+        if ($backups.DeepStorage.PowerPlanGuid) {
+            powercfg -setactive $backups.DeepStorage.PowerPlanGuid 2>$null
+            Write-Status "Önceki güç planı geri yüklendi." "OK"
+        }
+    }
+
+    # 6. Wi-Fi Geri Yükleme (RoamAggressiveness)
+    if ($backups.WiFi) {
+        Write-Host "  -> Yedeklenen Wi-Fi ayarları bulundu." -ForegroundColor Cyan
+        foreach ($adapterName in $backups.WiFi.psobject.properties.Name) {
+            $oldVal = $backups.WiFi.$adapterName
+            if ($null -ne $oldVal) {
+                Set-NetAdapterAdvancedProperty -Name $adapterName -RegistryKeyword "RoamAggressiveness" -RegistryValue $oldVal -ErrorAction SilentlyContinue
+                Write-Status "Wi-Fi Geri Yüklendi: $adapterName" "OK"
+            }
+        }
+    }
+
+    # 7. AdvancedTweaks Geri Yükleme
+    if ($backups.AdvancedTweaks) {
+        Write-Host "  -> Yedeklenen Gelişmiş Ayarlar bulundu." -ForegroundColor Cyan
+        $at = $backups.AdvancedTweaks
+
+        if ($null -ne $at.AllowTelemetry) { Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value $at.AllowTelemetry -ErrorAction SilentlyContinue }
+        if ($null -ne $at.DODownloadMode) { Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Name "DODownloadMode" -Value $at.DODownloadMode -ErrorAction SilentlyContinue }
+        if ($null -ne $at.SearchOrderConfig) { Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\DriverSearching" -Name "SearchOrderConfig" -Value $at.SearchOrderConfig -ErrorAction SilentlyContinue }
+        if ($null -ne $at.EnableTransparency) { Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Value $at.EnableTransparency -ErrorAction SilentlyContinue }
+        if ($null -ne $at.GlobalUserDisabled) { Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" -Name "GlobalUserDisabled" -Value $at.GlobalUserDisabled -ErrorAction SilentlyContinue }
+        if ($null -ne $at.WaitToKillServiceTimeout) { Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name "WaitToKillServiceTimeout" -Value $at.WaitToKillServiceTimeout -ErrorAction SilentlyContinue }
+        if ($at.DiagTrackStartType) { Set-Service DiagTrack -StartupType $at.DiagTrackStartType -ErrorAction SilentlyContinue }
+
+        Write-Status "Gelişmiş Ayarlar geri yüklendi." "OK"
     }
 
     Write-Host "`n  İşlem tamamlandı. Devam etmek için bir tuşa basın..." -ForegroundColor Gray
@@ -690,13 +846,38 @@ function Show-OptimizationMenu {
 function Show-AppStore {
     while ($true) {
         Write-Banner
-        Write-Host "  --- YAZILIM YÖNETİCİSİ ---" -ForegroundColor Yellow
+        Write-Host "  --- YAZILIM YÖNETİCİSİ (WINGET) ---" -ForegroundColor Yellow
         $keys = $script:SoftwareRepo.Keys | Sort-Object
         foreach ($k in $keys) { Write-Host "  [$k] $($script:SoftwareRepo[$k].Name)" -ForegroundColor White }
-        Write-Host "  [F] Arama | [B] GERİ DÖN" -ForegroundColor Green
-        Write-Host "`n  Seçim: " -NoNewline
+        Write-Host "  [B] GERİ DÖN" -ForegroundColor Green
+        Write-Host "`n  Kategori Seçin: " -NoNewline
+        
         $catInput = Get-Key
         if ($catInput -eq "B") { return }
+
+        if ($script:SoftwareRepo.ContainsKey($catInput)) {
+            $category = $script:SoftwareRepo[$catInput]
+            while ($true) {
+                Write-Banner
+                Write-Host "  --- $($category.Name) ---" -ForegroundColor Yellow
+                for ($i=0; $i -lt $category.Apps.Count; $i++) {
+                    Write-Host "  [$($i+1)] $($category.Apps[$i].name)" -ForegroundColor White
+                }
+                Write-Host "  [B] GERİ DÖN" -ForegroundColor Green
+                Write-Host "`n  Uygulama Seçin (Yüklemek için): " -NoNewline
+                
+                $appChoice = Read-Host
+                if ($appChoice -eq "B") { break }
+                
+                if ([int]::TryParse($appChoice, [ref]$idx) -and $idx -le $category.Apps.Count -and $idx -gt 0) {
+                    $selectedApp = $category.Apps[$idx-1]
+                    Write-Host "`n  > $($selectedApp.name) yükleniyor... Lütfen bekleyin." -ForegroundColor Cyan
+                    winget install --id $selectedApp.id --silent --accept-package-agreements --accept-source-agreements
+                    Write-Host "  > İşlem tamamlandı. Devam etmek için bir tuşa basın..." -ForegroundColor DarkGray
+                    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+                }
+            }
+        }
     }
 }
 
