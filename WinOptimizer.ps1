@@ -30,6 +30,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 $script:Version    = "3.2.2"
 $script:ScriptDir  = $PSScriptRoot
 $script:ConfigPath = Join-Path $script:ScriptDir "config.json"
+$script:BackupPath = Join-Path $script:ScriptDir "backups.json"
 $script:LogPath    = "$env:TEMP\WinOptimizer_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
 $script:ReportPath = "$env:TEMP\WinOptimizer_Report_$(Get-Date -Format 'yyyyMMdd_HHmmss').html"
 $script:Results    = [System.Collections.Generic.List[PSCustomObject]]::new()
@@ -48,6 +49,9 @@ if ($null -eq $script:Config) {
         report    = [PSCustomObject]@{ generate_html = $true; open_after_generate = $true }
     }
 }
+
+# Somut Performans: Statik sistem bilgilerini önbelleğe al
+$script:CachedOS = Get-CimInstance Win32_OperatingSystem
 
 $script:SoftwareRepo = @{
     "1" = @{ Name = "Web Tarayıcılar"; Apps = @(@{name="Chrome";id="Google.Chrome"},@{name="Brave";id="Brave.Brave"},@{name="Zen";id="Zen-Browser.Zen"},@{name="Arc";id="TheBrowserCompany.Arc"},@{name="Firefox";id="Mozilla.Firefox"}) }
@@ -104,10 +108,12 @@ function Add-Result([string]$Category, [string]$Action, [bool]$Success, [string]
 }
 
 function Get-SystemSnapshot {
-    $os  = Get-CimInstance Win32_OperatingSystem
+    # Statik bilgileri önbellekten, değişken olanları (FreeRAM) anlık al
+    $os  = $script:CachedOS
+    $freeMem = [math]::Round((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1MB, 2)
     return [PSCustomObject]@{
         Time        = Get-Date
-        FreeRAM_GB  = [math]::Round($os.FreePhysicalMemory / 1MB, 2)
+        FreeRAM_GB  = $freeMem
         FreeDisk_GB = [math]::Round((Get-PSDrive C).Free / 1GB, 2)
     }
 }
@@ -188,10 +194,28 @@ function Repair-MouseDrivers {
 }
 
 function Set-HighPerformancePlan {
+    <#
+    .SYNOPSIS
+        Yüksek performans güç planını aktif eder ve mevcut planı yedekler.
+    #>
     Write-Section "GÜÇ PLANI"
-    powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
-    Write-Status "Yüksek Performans planı aktif" "OK"
-    Add-Result "Güç" "Performans Planı" $true
+    
+    try {
+        # Mevcut Aktif Planı Al ve Yedekle
+        $currentPlanMsg = powercfg -getactivescheme
+        if ($currentPlanMsg -match "GUID: ([\w-]+)") {
+            $oldGuid = $matches[1]
+            $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw | ConvertFrom-Json } else { @{} }
+            $backups | Add-Member -Name "PowerPlan" -Value $oldGuid -Force
+            $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
+        }
+
+        powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
+        Write-Status "Yüksek Performans planı aktif edildi (Eski plan yedeklendi)" "OK"
+        Add-Result "Güç" "Performans Planı" $true "Eski Plan: $oldGuid"
+    } catch {
+        Write-Status "Güç planı değiştirilemedi: $($_.Exception.Message)" "FAIL"
+    }
 }
 
 function Enable-GameMode {
@@ -200,8 +224,22 @@ function Enable-GameMode {
         "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers",
         "HKCU:\Software\Microsoft\GameBar"
     )
-    foreach ($path in $regPaths) { if (-not (Test-Path $path)) { New-Item -Path $path -Force | Out-Null } }
     
+    # Somut Rollback: Mevcut değerleri yedekle
+    $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw | ConvertFrom-Json } else { [PSCustomObject]@{} }
+    if (-not $backups.Registry) { $backups | Add-Member -Name "Registry" -Value (New-Object PSObject) }
+
+    foreach ($path in $regPaths) { 
+        if (-not (Test-Path $path)) { New-Item -Path $path -Force | Out-Null } 
+    }
+    
+    $oldHwSch = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name "HwSchMode" -ErrorAction SilentlyContinue).HwSchMode
+    $oldGameBar = (Get-ItemProperty -Path "HKCU:\Software\Microsoft\GameBar" -Name "AllowAutoGameMode" -ErrorAction SilentlyContinue).AllowAutoGameMode
+    
+    if ($null -ne $oldHwSch) { $backups.Registry | Add-Member -Name "HwSchMode" -Value $oldHwSch -Force }
+    if ($null -ne $oldGameBar) { $backups.Registry | Add-Member -Name "AllowAutoGameMode" -Value $oldGameBar -Force }
+    $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
+
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name "HwSchMode" -Value 2 -ErrorAction SilentlyContinue
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\GameBar" -Name "AllowAutoGameMode" -Value 1 -ErrorAction SilentlyContinue
     Write-Status "Game Mode ve HAGS optimize edildi" "OK"
@@ -210,16 +248,25 @@ function Enable-GameMode {
 
 function Clear-TempFiles {
     Write-Section "TEMİZLİK"
+    $skippedCount = 0
+    $successCount = 0
+    
     # Somut Kararlılık: Kilitli dosyalar yüzünden tüm işlemin durmasını engellemek için öğeleri tek tek tara
     Get-ChildItem "$env:TEMP\*" -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
         try {
-            Remove-Item $_.FullName -Recurse -Force -ErrorAction SilentlyContinue
+            Remove-Item $_.FullName -Recurse -Force -ErrorAction Stop
+            $successCount++
         } catch {
-            # Kilitli dosyalar sessizce atlanır, işlem devam eder
+            $skippedCount++
         }
     }
-    Write-Status "Geçici dosyalar temizlendi" "OK"
-    Add-Result "Disk" "Geçici Dosyalar" $true
+    
+    if ($skippedCount -gt 0) {
+        Write-Status "Temizlik tamamlandi. $successCount oge silindi, $skippedCount kilitli oge atlandi." "OK"
+    } else {
+        Write-Status "Gecici dosyalar tamamen temizlendi ($successCount oge)." "OK"
+    }
+    Add-Result "Disk" "Geçici Dosyalar" $true "Silinen: $successCount, Atlanan: $skippedCount"
 }
 
 function Set-OptimalDns {
@@ -266,9 +313,18 @@ function Set-OptimalDns {
     if ($bestDns) {
         Write-Status "En hızlı sunucu seçildi: $($bestDns.Name) ($($bestDns.Latency) ms)" "OK"
         $adapters = Get-NetAdapter | Where-Object { $_.Status -eq "Up" }
+        
+        # Somut Rollback: Mevcut DNS ayarlarını yedekle
+        $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw | ConvertFrom-Json } else { [PSCustomObject]@{} }
+        if (-not $backups.DNS) { $backups | Add-Member -Name "DNS" -Value (New-Object PSObject) }
+        
         foreach ($a in $adapters) { 
+            $currentDns = (Get-DnsClientServerAddress -InterfaceAlias $a.Name).ServerAddresses
+            $backups.DNS | Add-Member -Name $a.Name -Value $currentDns -Force
             Set-DnsClientServerAddress -InterfaceAlias $a.Name -ServerAddresses @($bestDns.IP, $bestDns.Alt) -ErrorAction SilentlyContinue 
         }
+        $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
+
         Add-Result "Ağ" "DNS Optimizasyonu" $true "En hızlı seçilen: $($bestDns.Name)"
     } else {
         Write-Status "DNS testleri başarısız oldu, varsayılan Cloudflare atanıyor." "WARN"
@@ -297,6 +353,16 @@ function Optimize-VisualEffects {
     Write-Section "GÖRSEL"
     $path = "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects"
     if (-not (Test-Path $path)) { New-Item -Path $path -Force | Out-Null }
+    
+    # Somut Rollback: Eski değeri yedekle
+    $oldVal = (Get-ItemProperty -Path $path -Name "VisualFXSetting" -ErrorAction SilentlyContinue).VisualFXSetting
+    if ($null -ne $oldVal) {
+        $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw | ConvertFrom-Json } else { [PSCustomObject]@{} }
+        if (-not $backups.Registry) { $backups | Add-Member -Name "Registry" -Value (New-Object PSObject) }
+        $backups.Registry | Add-Member -Name "VisualFXSetting" -Value $oldVal -Force
+        $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
+    }
+
     Set-ItemProperty -Path $path -Name "VisualFXSetting" -Value 2 -ErrorAction SilentlyContinue
     Write-Status "Performans modu ayarlandı" "OK"
     Add-Result "Görsel" "Performans Modu" $true
@@ -314,10 +380,25 @@ function Optimize-DeepStorage {
 
 function Disable-SysMain {
     Write-Section "SYSMAIN"
-    Stop-Service SysMain -Force -ErrorAction SilentlyContinue
-    Set-Service SysMain -StartupType Disabled -ErrorAction SilentlyContinue
-    Write-Status "SysMain kapatıldı" "OK"
-    Add-Result "Sistem" "SysMain Kapatma" $true
+    
+    try {
+        # Somut Rollback: Servis başlangıç türünü yedekle
+        $svc = Get-Service SysMain -ErrorAction SilentlyContinue
+        if ($svc) {
+            $backups = if (Test-Path $script:BackupPath) { Get-Content $script:BackupPath -Raw | ConvertFrom-Json } else { [PSCustomObject]@{} }
+            if (-not $backups.Services) { $backups | Add-Member -Name "Services" -Value (New-Object PSObject) }
+            $backups.Services | Add-Member -Name "SysMain" -Value $svc.StartType.ToString() -Force
+            $backups | ConvertTo-Json | Out-File $script:BackupPath -Encoding UTF8
+        }
+
+        Stop-Service SysMain -Force -ErrorAction Stop
+        Set-Service SysMain -StartupType Disabled -ErrorAction Stop
+        Write-Status "SysMain kapatıldı (Eski durum yedeklendi)" "OK"
+        Add-Result "Sistem" "SysMain Kapatma" $true
+    } catch {
+        Write-Status "SysMain kapatılamadı: $($_.Exception.Message)" "FAIL"
+        Add-Result "Sistem" "SysMain Kapatma" $false "Hata: $($_.Exception.Message)"
+    }
 }
 
 function Optimize-WiFi {
@@ -487,6 +568,61 @@ function Export-HtmlReport {
     $shell.Open($script:ReportPath)
 }
 
+function Invoke-Rollback {
+    <#
+    .SYNOPSIS
+        Yedeklenen ayarlari backups.json üzerinden geri yükler.
+    #>
+    Write-Section "AYARLARI GERİ YÜKLEME (UNDO)"
+    if (-not (Test-Path $script:BackupPath)) {
+        Write-Status "Yedek dosyası bulunamadı." "WARN"
+        return
+    }
+
+    $backups = Get-Content $script:BackupPath -Raw | ConvertFrom-Json
+    
+    # 1. Güç Planı Geri Yükleme
+    if ($backups.PowerPlan) {
+        Write-Host "  -> Yedeklenen Güç Planı bulundu ($($backups.PowerPlan))" -ForegroundColor Cyan
+        powercfg -setactive $backups.PowerPlan 2>$null
+        Write-Status "Güç planı eski haline getirildi." "OK"
+    }
+
+    # 2. DNS Geri Yükleme
+    if ($backups.DNS) {
+        Write-Host "  -> Yedeklenen DNS ayarları bulundu." -ForegroundColor Cyan
+        foreach ($adapterName in $backups.DNS.psobject.properties.Name) {
+            $addr = $backups.DNS.$adapterName
+            if ($addr) {
+                Set-DnsClientServerAddress -InterfaceAlias $adapterName -ServerAddresses $addr -ErrorAction SilentlyContinue
+                Write-Status "DNS Geri Yüklendi: $adapterName" "OK"
+            }
+        }
+    }
+
+    # 3. Servis Geri Yükleme
+    if ($backups.Services.SysMain) {
+        Write-Host "  -> Yedeklenen SysMain durumu bulundu ($($backups.Services.SysMain))" -ForegroundColor Cyan
+        Set-Service SysMain -StartupType $backups.Services.SysMain -ErrorAction SilentlyContinue
+        Write-Status "SysMain servisi eski durumuna getirildi." "OK"
+    }
+
+    # 4. Registry Geri Yükleme
+    if ($backups.Registry) {
+        Write-Host "  -> Yedeklenen Registry ayarları bulundu." -ForegroundColor Cyan
+        if ($backups.Registry.HwSchMode -ne $null) {
+            Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name "HwSchMode" -Value $backups.Registry.HwSchMode -ErrorAction SilentlyContinue
+        }
+        if ($backups.Registry.VisualFXSetting -ne $null) {
+            Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value $backups.Registry.VisualFXSetting -ErrorAction SilentlyContinue
+        }
+        Write-Status "Registry ayarları geri yüklendi." "OK"
+    }
+
+    Write-Host "`n  İşlem tamamlandı. Devam etmek için bir tuşa basın..." -ForegroundColor Gray
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+}
+
 function Invoke-AllModules {
     $script:BeforeSnap = Get-SystemSnapshot
     
@@ -518,8 +654,8 @@ function Show-OptimizationMenu {
         Write-Host "  [9] Görsel Efekt            [D] Derin Depolama" -ForegroundColor White
         Write-Host "  [S] SysMain                 [W] Wi-Fi" -ForegroundColor White
         Write-Host "  [T] Haftalık Görev          [G] Gelişmiş Ayarlar" -ForegroundColor Green
-        Write-Host "  [V] Rapor Aç                [A] Hepsini Uygula" -ForegroundColor Cyan
-        Write-Host "  [B] ANA MENÜYE DÖN" -ForegroundColor DarkGray
+        Write-Host "  [V] Rapor Aç                [U] AYARLARI GERİ AL" -ForegroundColor Yellow
+        Write-Host "  [A] Hepsini Uygula          [B] ANA MENÜYE DÖN" -ForegroundColor Cyan
         Write-Host ""
         Write-Host "  Seçim: " -NoNewline
         $opt = Get-Key
@@ -541,9 +677,10 @@ function Show-OptimizationMenu {
         elseif ($opt -eq "R") { Register-WeeklyTask -Remove }
         elseif ($opt -eq "G") { Optimize-AdvancedTweaks }
         elseif ($opt -eq "V") { Export-HtmlReport }
+        elseif ($opt -eq "U") { Invoke-Rollback }
         elseif ($opt -eq "A") { Invoke-AllModules; return }
 
-        if ("123456789DSWTRVG" -like "*$opt*") {
+        if ("123456789DSWTRVGU" -like "*$opt*") {
             Write-Host "`n  Tamamlandı. Devam etmek için bir tuşa basın..." -ForegroundColor DarkGray
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
