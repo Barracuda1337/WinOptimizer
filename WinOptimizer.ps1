@@ -267,14 +267,6 @@ function Register-WeeklyTask {
     Add-Result "Görev" "Haftalık Bakım" $true
 }
 
-function Show-KnowledgeBase {
-    Write-Banner
-    Write-Host "  --- BİLGİ BANKASI ---" -ForegroundColor Yellow
-    Write-Host "  * Fare Gecikmesi, SysMain ve Ping rehberi burada." -ForegroundColor Gray
-    Write-Host "`n  Geri dönmek için bir tuşa basın..."
-    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-}
-
 function Export-HtmlReport {
     param($Before, $After)
     Write-Host "`n  [!] Rapor hazırlanıyor ve açılıyor..." -ForegroundColor Cyan
@@ -415,15 +407,13 @@ while ($true) {
     Write-Banner
     Write-Host "  [1] OPTİMİZASYON MENÜSÜ" -ForegroundColor Cyan
     Write-Host "  [2] YAZILIM ANSIKLOPEDİSİ" -ForegroundColor Green
-    Write-Host "  [3] BİLGİ BANKASI" -ForegroundColor Blue
-    Write-Host "  [4] SİSTEMİ GÜNCELLE" -ForegroundColor Yellow
+    Write-Host "  [3] SİSTEMİ GÜNCELLE" -ForegroundColor Yellow
     Write-Host "  [Q] ÇIKIŞ" -ForegroundColor DarkGray
     Write-Host "`n  Seçiminiz: " -NoNewline
     $startChoice = Get-Key
 
     if     ($startChoice -eq "1") { Show-OptimizationMenu }
     elseif ($startChoice -eq "2") { Show-AppStore }
-    elseif ($startChoice -eq "3") { Show-KnowledgeBase }
-    elseif ($startChoice -eq "4") { winget upgrade --all; Read-Host }
+    elseif ($startChoice -eq "3") { winget upgrade --all; Read-Host }
     elseif ($startChoice -eq "Q") { exit }
 }
