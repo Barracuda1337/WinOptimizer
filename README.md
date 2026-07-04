@@ -1,24 +1,12 @@
-# 🚀 WinOptimizer v3.2.2 - Ultra-Stable Expert Edition
+# 💎 WinOptimizer v3.2.2 Expert
 
-Modern, hızlı ve modüler Windows optimizasyon aracı. Tek bir PowerShell scripti ile sisteminizi profesyonel bir seviyeye taşıyın.
-
----
-
-## 🌟 Öne Çıkan Özellikler
-
-- **⚡ FastMenu Pro:** Anlık klavye tepkisi ile ultra hızlı navigasyon.
-- **🛠️ Expert Modules:** Fare gecikme onarımı, yüksek performans planları ve oyun modu optimizasyonu.
-- **📦 Yazılım Ansiklopedisi (Store):** Winget destekli, kategorize edilmiş yazılım kütüphanesi.
-- **📊 Premium HTML Raporu:** İşlem sonrası sistemdeki kazancı gösteren Dashboard tasarımı.
-- **🛡️ Gelişmiş Tweaks (YENİ):** Telemetry kapatma, SSD TRIM kontrolü ve P2P güncelleme engelleme.
-- **💾 Derin Depolama:** Kış uykusu ve ayrılmış depolama yönetimi ile GB'larca yer açma.
-- **🗓️ Otomatik Bakım:** Haftalık otomatik temizlik görevi tanımlama.
+> **Güçlü, Hızlı ve Güvenli Windows Optimizasyon Paneli.** Sistemi yormadan, sadece ihtiyacınız olan dokunuşları yaparak Windows deneyiminizi zirveye taşır.
 
 ---
 
-## ⚡ Tek Komutla Çalıştır (Hızlı Başlangıç)
+## ⚡ Hızlı Başlat (Anında Çalıştır)
 
-Hiçbir dosya indirmeden, sadece PowerShell (Yönetici) ekranına aşağıdaki komutu yapıştırarak anında başlayabilirsiniz:
+Hiçbir dosya indirmekle uğraşmadan, aşağıdaki komutu **PowerShell (Yönetici)** ekranına yapıştırıp `Enter` tuşuna basmanız yeterlidir:
 
 ```powershell
 irm https://raw.githubusercontent.com/Barracuda1337/WinOptimizer/main/WinOptimizer.ps1 | iex
@@ -26,43 +14,60 @@ irm https://raw.githubusercontent.com/Barracuda1337/WinOptimizer/main/WinOptimiz
 
 ---
 
-## 🛠️ Kullanım ve Kurulum (Manuel)
+## ✨ Neden WinOptimizer?
 
-1. **Powershell (Yönetici)** olarak açın.
-2. Script dizinine gidin.
-3. Aşağıdaki komutla çalıştırın:
+WinOptimizer, standart temizlik araçlarının aksine sisteme zarar vermeyen, "Safe-to-Apply" (Uygulaması Güvenli) felsefesiyle geliştirilmiş **Expert** seviye bir araçtır.
 
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force
-.\WinOptimizer.ps1
-```
+### 🛡️ Temel Özellikler
+- 🚀 **Performans:** Yüksek performans güç planları ve sistem öncelikleri.
+- 🎮 **Gaming:** HAGS ve Game Mode ile oyunlarda düşük gecikme.
+- 🧹 **Temizlik:** Disk temizliği ve gereksiz Windows servislerinin (SysMain vb.) yönetimi.
+- 🔒 **Gizlilik:** Telemetry ve arka plan veri toplama kapatma.
+- 📦 **Depolama:** Derin depolama optimizasyonu ile GB'larca SSD alanı.
 
 ---
 
-## 📋 Optimizasyon Modülleri
+## 📋 Modül Detayları
 
-| Modül | Açıklama | Fayda |
+| Modül | Açıklama | Hedef |
 | :--- | :--- | :--- |
-| **Gelişmiş Ayarlar** | Telemetry, WUDO, SSD TRIM | Gizlilik & İnternet Hızı |
-| **Derin Depolama** | Hiberfil, Reserved Storage | SSD Yer Tasarrufu |
-| **Oyun Modu** | HAGS, Game Mode | Maksimum FPS |
-| **Ağ Optimizasyonu** | Cloudflare DNS, Wi-Fi Roaming | Kararlı Ping |
-| **Görsel Efektler** | Win Performance Mode | Düşük Gecikme |
+| **Gelişmiş Tweaks** | Telemetry, WUDO, SSD TRIM | **Gizlilik & Hız** |
+| **Derin Depolama** | Hibernation & Reserved Storage | **Ekstra Alan** |
+| **Oyun Modu** | HAGS, Game Bar, Game Mode | **Yüksek FPS** |
+| **Ağ Optimizasyonu** | Cloudflare DNS & Wi-Fi Roaming | **Düşük Ping** |
+| **Donanım Fix** | Fare Gecikme Onarımı (HID) | **Akıcılık** |
+| **Temizlik** | Temp, SoftwareDist, Prefetch | **Düzen** |
 
 ---
 
-## 📸 Raporlama Sistemi
+## 📊 Önce & Sonra Raporlama
 
-İşlem bittiğinde `[V]` tuşuna basarak veya `[A]` (Hepsini Uygula) seçeneğinden sonra otomatik olarak açılan **Premium HTML Raporu** ile sisteminizdeki RAM ve Disk kazancını, yapılan tüm işlemlerin detaylarını görsel bir panel üzerinden takip edebilirsiniz.
-
----
-
-## ⚠️ Uyarı ve Güvenlik
-
-- Bu araç **Administrator** yetkisi gerektirir.
-- İşlem öncesi otomatik olarak **Sistem Geri Yükleme Noktası** oluşturma seçeneği sunar.
-- Kod tamamen şeffaftır ve GitHub üzerinden incelenebilir.
+WinOptimizer'ın en güçlü yanı, ne yaptığını size göstermesidir. `[V]` tuşu ile açabileceğiniz **Premium HTML Raporu** sisteminizdeki değişimleri analiz eder:
+- ✅ Kaç işlemin başarılı olduğu.
+- 💾 Ne kadar disk alanı kazanıldığı.
+- 🧠 RAM özgürlük miktarının analizi.
+- 🕒 İşlem sürelerinin detaylı listesi.
 
 ---
 
-**Maintainer:** Barracuda1337 | **Versiyon:** 3.2.2
+## 🛠️ Manuel Kurulum
+
+Eğer projeyi yerel olarak saklamak ve kurcalamak isterseniz:
+
+1. Projeyi ZIP olarak indirin veya `git clone` yapın.
+2. `WinOptimizer.ps1` dosyasına sağ tıklayıp "PowerShell ile Çalıştır" diyerek başlatın.
+3. Yönetici izni istendiğinde "Evet" diyerek onay verin.
+
+---
+
+## ⚠️ Önemli Notlar
+
+- Araç tamamen açık kaynak kodludur.
+- Her büyük optimizasyon öncesi **Geri Yükleme Noktası** oluşturulması önerilir (Program içinde mevcuttur).
+- Modern Windows (10/11) sürümleriyle tam uyumludur.
+
+---
+
+**Maintainer:** Barracuda1337  
+**Build:** v3.2.2.0407  
+**Status:** Stable & Verified ✔️
