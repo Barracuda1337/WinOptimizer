@@ -411,30 +411,28 @@ function Show-OptimizationMenu {
         Write-Host "  Seciminiz: " -NoNewline
         $opt = Get-Key
         
-        switch ($opt) {
-            "1" { New-OptimizeRestorePoint }
-            "2" { Clear-TempFiles }
-            "3" { Set-HighPerformancePlan }
-            "4" { Enable-GameMode }
-            "5" { Set-OptimalDns }
-            "6" { Repair-MouseDrivers }
-            "7" { Disable-StartupPrograms }
-            "8" { Remove-Bloatware }
-            "9" { Optimize-VisualEffects }
-            "D" { Optimize-DeepStorage }
-            "S" { Disable-SysMain }
-            "W" { Optimize-WiFi }
-            "T" { Register-WeeklyTask }
-            "R" { Register-WeeklyTask -Remove }
-            "V" { Export-HtmlReport -Before $null -After $null }
-            "A" { Invoke-AllModules; return }
-            "B" { return }
-        }
-        if ($opt -ne "B" -and $opt -ne "A") {
+        if ($opt -eq "B") { return }
+        if ($opt -eq "1") { New-OptimizeRestorePoint }
+        elseif ($opt -eq "2") { Clear-TempFiles }
+        elseif ($opt -eq "3") { Set-HighPerformancePlan }
+        elseif ($opt -eq "4") { Enable-GameMode }
+        elseif ($opt -eq "5") { Set-OptimalDns }
+        elseif ($opt -eq "6") { Repair-MouseDrivers }
+        elseif ($opt -eq "7") { Disable-StartupPrograms }
+        elseif ($opt -eq "8") { Remove-Bloatware }
+        elseif ($opt -eq "9") { Optimize-VisualEffects }
+        elseif ($opt -eq "D") { Optimize-DeepStorage }
+        elseif ($opt -eq "S") { Disable-SysMain }
+        elseif ($opt -eq "W") { Optimize-WiFi }
+        elseif ($opt -eq "T") { Register-WeeklyTask }
+        elseif ($opt -eq "R") { Register-WeeklyTask -Remove }
+        elseif ($opt -eq "V") { Export-HtmlReport -Before $null -After $null }
+        elseif ($opt -eq "A") { Invoke-AllModules; return }
+
+        if ($opt -match "[1-9DSWTRV]") {
             Write-Host "`n  İşlem bitti. Devam etmek için bir tuşa basın..." -ForegroundColor DarkGray
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
-        if ($opt -eq "A") { break }
     }
 }
 
@@ -446,7 +444,7 @@ function Show-AppStore {
         foreach ($k in $keys) { Write-Host "  [$k] $($script:SoftwareRepo[$k].Name)" -ForegroundColor White }
         Write-Host "  [F] Manuel Arama | [B] Ana Menü" -ForegroundColor Green
         Write-Host ""
-        Write-Host "  Seçiminiz: " -NoNewline
+        Write-Host "  Seciminiz: " -NoNewline
         $catInput = Get-Key
         
         if ($catInput -eq "B") { return }
