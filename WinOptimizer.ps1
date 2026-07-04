@@ -427,8 +427,8 @@ function Show-OptimizationMenu {
             "T" { Register-WeeklyTask }
             "R" { Register-WeeklyTask -Remove }
             "V" { Export-HtmlReport -Before $null -After $null }
-            "A" { Invoke-AllModules; break }
-            "B" { break }
+            "A" { Invoke-AllModules; return }
+            "B" { return }
         }
         if ($opt -ne "B" -and $opt -ne "A") {
             Write-Host "`n  İşlem bitti. Devam etmek için bir tuşa basın..." -ForegroundColor DarkGray
@@ -449,7 +449,7 @@ function Show-AppStore {
         Write-Host "  Seçiminiz: " -NoNewline
         $catInput = Get-Key
         
-        if ($catInput -eq "B") { break }
+        if ($catInput -eq "B") { return }
         if ($catInput -eq "F") {
             Write-Host "`n  Ad yazın: " -NoNewline
             $search = Read-Host
