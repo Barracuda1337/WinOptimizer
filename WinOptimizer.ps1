@@ -385,6 +385,7 @@ function Show-OptimizationMenu {
 function Show-AppStore {
     while ($true) {
         Write-Banner
+        Write-Host "  --- YAZILIM YÖNETİCİSİ ---" -ForegroundColor Yellow
         $keys = $script:SoftwareRepo.Keys | Sort-Object
         foreach ($k in $keys) { Write-Host "  [$k] $($script:SoftwareRepo[$k].Name)" -ForegroundColor White }
         Write-Host "  [F] Arama | [B] GERİ DÖN" -ForegroundColor Green
@@ -406,7 +407,7 @@ if ($Silent) { Invoke-AllModules; exit }
 while ($true) {
     Write-Banner
     Write-Host "  [1] OPTİMİZASYON MENÜSÜ" -ForegroundColor Cyan
-    Write-Host "  [2] YAZILIM ANSIKLOPEDİSİ" -ForegroundColor Green
+    Write-Host "  [2] YAZILIM YÖNETİCİSİ" -ForegroundColor Green
     Write-Host "  [3] SİSTEMİ GÜNCELLE" -ForegroundColor Yellow
     Write-Host "  [Q] ÇIKIŞ" -ForegroundColor DarkGray
     Write-Host "`n  Seçiminiz: " -NoNewline
