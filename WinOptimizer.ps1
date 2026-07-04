@@ -244,16 +244,22 @@ function Optimize-AdvancedTweaks {
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Name "DODownloadMode" -Value 0 -ErrorAction SilentlyContinue
     Write-Status "P2P Güncelleme Paylaşımı kapatıldı" "OK"
     
-    # SSD TRIM
+    # SSD TRIM & Aygıt Taraması
     fsutil behavior set DisableDeleteNotify 0 | Out-Null
-    Write-Status "SSD TRIM desteği doğrulandı" "OK"
+    Set-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\DriverSearching" -Name "SearchOrderConfig" -Value 0 -ErrorAction SilentlyContinue
+    Write-Status "SSD TRIM doğrulandı ve Aygıt Taraması optimize edildi" "OK"
     
-    # PCIe & USB Güç tasarrufu takılmalarını önleme
+    # Arka Plan Uygulamaları & Saydamlık
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\BackgroundAccessApplications" -Name "GlobalUserDisabled" -Value 1 -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -Name "EnableTransparency" -Value 0 -ErrorAction SilentlyContinue
+    Write-Status "Arka Plan Uygulamaları ve Saydamlık efektleri kapatıldı" "OK"
+
+    # PCIe & Hızlı Kapanma
     powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_PCIEXPRESS ASPM 0 2>$null
-    powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_NONE 48e617ee-cefa-4195-92ca-30b20144f8f8 0 2>$null
-    Write-Status "Güç tasarrufu kaynaklı takılmalar engellendi" "OK"
+    Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control" -Name "WaitToKillServiceTimeout" -Value "2000" -ErrorAction SilentlyContinue
+    Write-Status "Sistem kapanış süresi ve PCIe gecikmesi optimize edildi" "OK"
     
-    Add-Result "Sistem" "Gelişmiş Tweaks" $true
+    Add-Result "Sistem" "Gelişmiş Ayarlar Paketi" $true
 }
 
 function Register-WeeklyTask {
