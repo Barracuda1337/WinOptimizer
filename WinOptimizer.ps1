@@ -1,13 +1,13 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    WinOptimizer v3.2.1 - Ultra-Stable Edition
+    WinOptimizer v3.2.2 - Final Polish
 .DESCRIPTION
-    The ultimate Windows management suite with reinforced navigation logic.
+    The ultimate Windows management suite with perfected character encoding.
 .AUTHOR
     Barracuda1337 (github.com/Barracuda1337)
 .VERSION
-    3.2.1
+    3.2.2
 #>
 
 param(
@@ -27,7 +27,7 @@ $OutputEncoding = [System.Text.Encoding]::UTF8
 # ============================================================
 #  GLOBALS & CONFIG
 # ============================================================
-$script:Version    = "3.2.1"
+$script:Version    = "3.2.2"
 $script:ScriptDir  = $PSScriptRoot
 $script:ConfigPath = Join-Path $script:ScriptDir "config.json"
 $script:LogPath    = "$env:TEMP\WinOptimizer_$(Get-Date -Format 'yyyyMMdd_HHmmss').log"
@@ -131,6 +131,7 @@ function New-OptimizeRestorePoint {
         Enable-ComputerRestore -Drive "C:\" -ErrorAction Stop
         Checkpoint-Computer -Description "WinOptimizer v$($script:Version)" -RestorePointType "MODIFY_SETTINGS" -ErrorAction Stop
         Write-Status "Geri yükleme noktası oluşturuldu" "OK"
+        Add-Result "Sistem" "Geri Yükleme Noktası" $true
     } catch { Write-Status "Hata: $($_.Exception.Message)" "WARN" }
 }
 
@@ -143,7 +144,8 @@ function Disable-StartupPrograms {
         Remove-ItemProperty -Path "HKLM:\Software\Microsoft\Windows\CurrentVersion\Run" -Name $appName -ErrorAction SilentlyContinue
         $count++
     }
-    Write-Status "$count potansiyel başlangıç öğesi kontrol edildi" "OK"
+    Write-Status "$count potansiyel öğe kontrol edildi" "OK"
+    Add-Result "Sistem" "Başlangıç Programları" $true
 }
 
 function Repair-MouseDrivers {
@@ -153,12 +155,14 @@ function Repair-MouseDrivers {
         if (Test-Path $regKey) { Set-ItemProperty -Path $regKey -Name "EnhancedPowerManagementEnabled" -Value 0 -Type DWord -ErrorAction SilentlyContinue }
     }
     Write-Status "HID güç yönetimi optimize edildi" "OK"
+    Add-Result "Donanım" "Fare Gecikmesi" $true
 }
 
 function Set-HighPerformancePlan {
     Write-Section "GÜÇ PLANI"
     powercfg -setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c 2>$null
     Write-Status "Yüksek Performans planı aktif" "OK"
+    Add-Result "Güç" "Performans Planı" $true
 }
 
 function Enable-GameMode {
@@ -166,12 +170,14 @@ function Enable-GameMode {
     Set-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers" -Name "HwSchMode" -Value 2 -ErrorAction SilentlyContinue
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\GameBar" -Name "AllowAutoGameMode" -Value 1 -ErrorAction SilentlyContinue
     Write-Status "Game Mode ve HAGS optimize edildi" "OK"
+    Add-Result "Oyun" "Game Mode" $true
 }
 
 function Clear-TempFiles {
     Write-Section "TEMİZLİK"
     Remove-Item "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
     Write-Status "Geçici dosyalar temizlendi" "OK"
+    Add-Result "Disk" "Geçici Dosyalar" $true
 }
 
 function Set-OptimalDns {
@@ -179,6 +185,7 @@ function Set-OptimalDns {
     $adapters = Get-NetAdapter | Where-Object { $_.Status -eq "Up" }
     foreach ($a in $adapters) { Set-DnsClientServerAddress -InterfaceAlias $a.Name -ServerAddresses @("1.1.1.1", "8.8.8.8") -ErrorAction SilentlyContinue }
     Write-Status "Cloudflare DNS (1.1.1.1) atandı" "OK"
+    Add-Result "Ağ" "DNS Optimizasyonu" $true
 }
 
 function Remove-Bloatware {
@@ -187,12 +194,14 @@ function Remove-Bloatware {
         Get-AppxPackage -Name $p | Remove-AppxPackage -ErrorAction SilentlyContinue
     }
     Write-Status "Gereksiz paketler temizlendi" "OK"
+    Add-Result "Sistem" "Bloatware Kaldırma" $true
 }
 
 function Optimize-VisualEffects {
     Write-Section "GÖRSEL"
     Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects" -Name "VisualFXSetting" -Value 2 -ErrorAction SilentlyContinue
     Write-Status "Performans modu ayarlandı" "OK"
+    Add-Result "Görsel" "Performans Modu" $true
 }
 
 function Optimize-DeepStorage {
@@ -201,7 +210,8 @@ function Optimize-DeepStorage {
     DISM.exe /Online /Set-ReservedStorageState /State:Disabled /Quiet 2>$null
     powercfg -duplicatescheme e9a42b02-d5df-448d-aa00-03f14749eb61 2>$null
     powercfg -setactive e9a42b02-d5df-448d-aa00-03f14749eb61 2>$null
-    Write-Status "GB'larca yer açıldı ve Ultimate Performance aktif edildi" "OK"
+    Write-Status "GB'larca yer açıldı" "OK"
+    Add-Result "Disk" "Derin Depolama" $true
 }
 
 function Disable-SysMain {
@@ -209,6 +219,7 @@ function Disable-SysMain {
     Stop-Service SysMain -Force -ErrorAction SilentlyContinue
     Set-Service SysMain -StartupType Disabled -ErrorAction SilentlyContinue
     Write-Status "SysMain kapatıldı" "OK"
+    Add-Result "Sistem" "SysMain Kapatma" $true
 }
 
 function Optimize-WiFi {
@@ -217,6 +228,7 @@ function Optimize-WiFi {
         Set-NetAdapterAdvancedProperty -Name $_.Name -RegistryKeyword "RoamAggressiveness" -RegistryValue 1 -ErrorAction SilentlyContinue
     }
     Write-Status "Wi-Fi optimize edildi" "OK"
+    Add-Result "Ağ" "Wi-Fi Optimizasyonu" $true
 }
 
 function Register-WeeklyTask {
@@ -226,7 +238,8 @@ function Register-WeeklyTask {
     $action = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-File `"$PSScriptRoot\WinOptimizer.ps1`" -Silent"
     $trigger = New-ScheduledTaskTrigger -Weekly -DaysOfWeek Sunday -At "03:00AM"
     Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -RunLevel Highest -Force
-    Write-Status "Zamanlandı" "OK"
+    Write-Status "Bakım Görevi Tanımlandı" "OK"
+    Add-Result "Görev" "Haftalık Bakım" $true
 }
 
 function Show-KnowledgeBase {
@@ -239,7 +252,7 @@ function Show-KnowledgeBase {
 
 function Export-HtmlReport {
     param($Before, $After)
-    Write-Host "`n  [!] Rapor hazirlaniyor ve aciliyor..." -ForegroundColor Cyan
+    Write-Host "`n  [!] Rapor hazırlanıyor ve açılıyor..." -ForegroundColor Cyan
     
     $duration = [math]::Round(((Get-Date) - $script:StartTime).TotalSeconds, 1)
     $okCount   = @($script:Results | Where-Object { $_.Status -eq "OK" }).Count
@@ -247,7 +260,7 @@ function Export-HtmlReport {
     $diskGain = if ($Before -and $After) { [math]::Round($After.FreeDisk_GB - $Before.FreeDisk_GB, 2) } else { 0 }
 
     $rowsHtml = ($script:Results | ForEach-Object {
-        $badgeClass = switch ($_.Status) { "OK" { "ok" } "FAILED" { "fail" } default { "skip" } }
+        $badgeClass = if ($_.Status -eq "OK") { "ok" } else { "fail" }
         "<tr><td>$($_.Category)</td><td>$($_.Action)</td><td><span class='badge $badgeClass'>$($_.Status)</span></td><td>$($_.Detail)</td></tr>"
     }) -join ""
 
@@ -263,14 +276,13 @@ function Export-HtmlReport {
         .container { max-width: 1000px; margin: 0 auto; }
         .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; border-bottom: 1px solid #374151; padding-bottom: 20px; }
         .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 40px; }
-        .card { background: var(--card); border: 1px solid #1f2937; border-radius: 16px; padding: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); transition: transform 0.2s; }
-        .card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .card { background: var(--card); border: 1px solid #1f2937; border-radius: 16px; padding: 24px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         .val { font-size: 32px; font-weight: 800; color: var(--accent); }
         .lbl { font-size: 13px; color: #9ca3af; text-transform: uppercase; margin-top: 8px; letter-spacing: 0.1em; }
         table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--card); border-radius: 16px; overflow: hidden; border: 1px solid #1f2937; }
         th { background: #1f2937; padding: 16px; text-align: left; font-size: 13px; color: #9ca3af; text-transform: uppercase; }
         td { padding: 16px; border-bottom: 1px solid #1f2937; font-size: 14px; }
-        .badge { padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+        .badge { padding: 4px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; }
         .badge.ok { background: #064e3b; color: #34d399; }
         .badge.fail { background: #7f1d1d; color: #f87171; }
     </style>
@@ -282,10 +294,10 @@ function Export-HtmlReport {
             <div style="text-align:right; color:#9ca3af">$(Get-Date -Format 'F')</div>
         </div>
         <div class="grid">
-            <div class="card"><div class="val">$okCount</div><div class="lbl">&Idot;ÅŸlem Tamam</div></div>
-            <div class="card"><div class="val" style="color:var(--green)">+$diskGain GB</div><div class="lbl">Disk KazancÄ±</div></div>
-            <div class="card"><div class="val" style="color:var(--green)">+$ramGain GB</div><div class="lbl">RAM &Ouml;zg&uuml;rl&uuml;gu</div></div>
-            <div class="card"><div class="val">${duration}s</div><div class="lbl">S&uuml;re</div></div>
+            <div class="card"><div class="val">$okCount</div><div class="lbl">İşlem Tamam</div></div>
+            <div class="card"><div class="val" style="color:var(--green)">+$diskGain GB</div><div class="lbl">Disk Kazancı</div></div>
+            <div class="card"><div class="val" style="color:var(--green)">+$ramGain GB</div><div class="lbl">RAM Özgürlüğü</div></div>
+            <div class="card"><div class="val">${duration}s</div><div class="lbl">Süre</div></div>
         </div>
         <table>
             <thead><tr><th>Kategori</th><th>Girdi</th><th>Durum</th><th>Detay</th></tr></thead>
@@ -296,8 +308,6 @@ function Export-HtmlReport {
 </html>
 "@
     [System.IO.File]::WriteAllText($script:ReportPath, $html, [System.Text.Encoding]::UTF8)
-    
-    # En üst düzey Windows dosya açma yöntemi
     $shell = New-Object -ComObject Shell.Application
     $shell.Open($script:ReportPath)
 }
@@ -362,7 +372,6 @@ function Show-AppStore {
         Write-Host "`n  Seçim: " -NoNewline
         $catInput = Get-Key
         if ($catInput -eq "B") { return }
-        # ... repo logic ...
     }
 }
 
