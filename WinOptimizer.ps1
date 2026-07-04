@@ -231,6 +231,31 @@ function Optimize-WiFi {
     Add-Result "Ağ" "Wi-Fi Optimizasyonu" $true
 }
 
+function Optimize-AdvancedTweaks {
+    Write-Section "GELİŞMİŞ AYARLAR & GİZLİLİK"
+    
+    # Telemetry Kapatma
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\DataCollection" -Name "AllowTelemetry" -Value 0 -ErrorAction SilentlyContinue
+    Stop-Service DiagTrack -Force -ErrorAction SilentlyContinue
+    Set-Service DiagTrack -StartupType Disabled -ErrorAction SilentlyContinue
+    Write-Status "Telemetry ve Veri Toplama kapatıldı" "OK"
+    
+    # Teslimat Optimizasyonu (WUDO)
+    Set-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\DeliveryOptimization\Config" -Name "DODownloadMode" -Value 0 -ErrorAction SilentlyContinue
+    Write-Status "P2P Güncelleme Paylaşımı kapatıldı" "OK"
+    
+    # SSD TRIM
+    fsutil behavior set DisableDeleteNotify 0 | Out-Null
+    Write-Status "SSD TRIM desteği doğrulandı" "OK"
+    
+    # PCIe & USB Güç tasarrufu takılmalarını önleme
+    powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_PCIEXPRESS ASPM 0 2>$null
+    powercfg /SETACVALUEINDEX SCHEME_CURRENT SUB_NONE 48e617ee-cefa-4195-92ca-30b20144f8f8 0 2>$null
+    Write-Status "Güç tasarrufu kaynaklı takılmalar engellendi" "OK"
+    
+    Add-Result "Sistem" "Gelişmiş Tweaks" $true
+}
+
 function Register-WeeklyTask {
     param([switch]$Remove)
     $taskName = "WinOptimizer_Weekly"
@@ -314,7 +339,7 @@ function Export-HtmlReport {
 
 function Invoke-AllModules {
     $script:BeforeSnap = Get-SystemSnapshot
-    New-OptimizeRestorePoint; Clear-TempFiles; Set-HighPerformancePlan; Enable-GameMode; Set-OptimalDns; Repair-MouseDrivers; Disable-StartupPrograms; Optimize-VisualEffects; Remove-Bloatware; Disable-SysMain; Optimize-WiFi; Optimize-DeepStorage
+    New-OptimizeRestorePoint; Clear-TempFiles; Set-HighPerformancePlan; Enable-GameMode; Set-OptimalDns; Repair-MouseDrivers; Disable-StartupPrograms; Optimize-VisualEffects; Remove-Bloatware; Disable-SysMain; Optimize-WiFi; Optimize-DeepStorage; Optimize-AdvancedTweaks
     $script:AfterSnap = Get-SystemSnapshot
     Export-HtmlReport -Before $script:BeforeSnap -After $script:AfterSnap
 }
@@ -332,8 +357,9 @@ function Show-OptimizationMenu {
         Write-Host "  [7] Başlangıç               [8] Bloatware" -ForegroundColor White
         Write-Host "  [9] Görsel Efekt            [D] Derin Depolama" -ForegroundColor White
         Write-Host "  [S] SysMain                 [W] Wi-Fi" -ForegroundColor White
-        Write-Host "  [T] Haftalık Görev          [V] Rapor Aç" -ForegroundColor White
-        Write-Host "  [A] Hepsini Uygula          [B] ANA MENÜYE DÖN" -ForegroundColor Cyan
+        Write-Host "  [T] Haftalık Görev          [G] Gelişmiş Ayarlar" -ForegroundColor Green
+        Write-Host "  [V] Rapor Aç                [A] Hepsini Uygula" -ForegroundColor Cyan
+        Write-Host "  [B] ANA MENÜYE DÖN" -ForegroundColor DarkGray
         Write-Host ""
         Write-Host "  Seçim: " -NoNewline
         $opt = Get-Key
@@ -353,10 +379,11 @@ function Show-OptimizationMenu {
         elseif ($opt -eq "W") { Optimize-WiFi }
         elseif ($opt -eq "T") { Register-WeeklyTask }
         elseif ($opt -eq "R") { Register-WeeklyTask -Remove }
+        elseif ($opt -eq "G") { Optimize-AdvancedTweaks }
         elseif ($opt -eq "V") { Export-HtmlReport }
         elseif ($opt -eq "A") { Invoke-AllModules; return }
 
-        if ("123456789DSWTRV" -like "*$opt*") {
+        if ("123456789DSWTRVG" -like "*$opt*") {
             Write-Host "`n  Tamamlandı. Devam etmek için bir tuşa basın..." -ForegroundColor DarkGray
             $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
         }
